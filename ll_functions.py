@@ -31,6 +31,8 @@ except IndexError:
 
     CONFIG["URL"] = input("What is your /api URL? ")
 
+    f.seek(0)
+    f.truncate()
     f.write(yaml.dump(CONFIG))
 
 if not re.match("^https?://.*/|\?api$", CONFIG["URL"]):
