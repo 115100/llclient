@@ -83,7 +83,8 @@ def post_data(action, json_dict={}, data_tuple=None):
 
 def get_token(token_path=expanduser("~/.ll_token")):
     """
-        Check token_path for token it exists or retrieve token from user input
+        Check token_path for token if it exists
+        or retrieve token from user input
     """
     if isfile(token_path):
         with open(token_path, 'r') as f:
@@ -183,7 +184,7 @@ def edit_settings(settings_dict):
 
 def release_token(token_path=expanduser("~/.ll_token")):
     """
-        Release token given by token_path and removes it
+        Release token given by token_path and remove it
     """
     if not token_path or not isfile(token_path):
         print(token_path + " doesn't exist to release")
@@ -199,7 +200,7 @@ def release_token(token_path=expanduser("~/.ll_token")):
 
 def release_all_tokens(token_path=expanduser("~/.ll_token")):
     """
-        Release all authentication tokens and deletes given token_path
+        Release all authentication tokens and delete given token_path
     """
     if not token_path or not isfile(token_path):
         print(token_path + " doesn't exist to release")
