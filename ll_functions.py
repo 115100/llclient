@@ -35,7 +35,9 @@ except IndexError:
     f.truncate()
     f.write(yaml.dump(CONFIG))
 
-if not re.match("^https?://.*/|\?api$", CONFIG["URL"]):
+    ROOT_URL = CONFIG["URL"]
+
+if not re.match("^https?://.*/|\?api$", ROOT_URL):
     print("Invalid URL passed")
     f.close()
     sys.exit(1)
