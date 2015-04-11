@@ -14,6 +14,8 @@ try:
     f = open(expanduser("~/.ll_config"), 'r+')
 except Exception:
     print("No config file found at: " + expanduser("~/.ll_config"))
+    sys.exit(1)
+    return
 
 CONFIG = yaml.load(f)
 try:
