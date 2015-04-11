@@ -37,13 +37,12 @@ except IndexError:
 
     ROOT_URL = CONFIG["URL"]
 
+f.close()
+
 if not re.match("^https?://.*/|\?api$", ROOT_URL):
     print("Invalid URL passed")
-    f.close()
     sys.exit(1)
     return
-
-f.close()
 
 
 def post_data(action, json_dict={}, data_tuple=None):
