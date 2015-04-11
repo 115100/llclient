@@ -11,8 +11,8 @@ import sys
 import yaml
 
 try:
-    f = open(expanduser("~/.ll_config"), 'r+')
-except Exception:
+    f = open(expanduser("~/.ll_config"), "r+")
+except OSError:
     print("No config file found at: " + expanduser("~/.ll_config"))
     sys.exit(1)
     return
@@ -140,11 +140,11 @@ def get_thumbnail(uid):
     return response.json()["thumbnail"]
 
 
-def upload(file):
+def upload(file_path):
     """
-        Upload a file
+        Upload file file_path
     """
-    with open(file, 'rb') as f:
+    with open(file_path, 'rb') as f:
         response = post_data("upload", {"filename": file}, ("data", f, ''))
 
     if response.status_code == 202:
