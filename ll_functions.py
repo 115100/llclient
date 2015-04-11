@@ -37,6 +37,7 @@ except IndexError:
 
 if not re.match("^https?://.*/|\?api$", CONFIG["URL"]):
     print("Invalid URL passed")
+    f.close()
     sys.exit(1)
     return
 
