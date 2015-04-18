@@ -15,7 +15,6 @@ try:
 except OSError:
     print("No config file found at: " + expanduser("~/.ll_config"))
     sys.exit(1)
-    return
 
 CONFIG = yaml.load(f)
 try:
