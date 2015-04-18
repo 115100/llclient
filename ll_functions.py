@@ -74,12 +74,17 @@ def post_data(action, json_dict={}, data_tuple=None):
         headers={
             "content-type": m.content_type})
 
-    if response.status_code >= 300:
+    try:
+        response.raise_for_status()
+    except:
         raise Exception(
             "Error {error_code} with {action}: {error}".format(
                 error_code=response.status_code,
                 action=action,
                 error=response.text))
+
+   if response.status_code not in (200, 201):
+       print("Error: %s" % response.json()["message"])
 
     return response
 
