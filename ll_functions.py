@@ -12,14 +12,14 @@ import yaml
 
 try:
     f = open(expanduser("~/.ll_config"), "r+")
-except OSError, IOError:
+except (OSError, IOError):
     print("No config file found at: " + expanduser("~/.ll_config"))
     sys.exit(1)
 
 CONFIG = yaml.load(f)
 try:
     ROOT_URL = CONFIG["URL"]
-except IndexError, TypeError:
+except (IndexError, TypeError):
     print("No URL setting found in " + expanduser("~/.ll_config"))
 
     i = input("Do you want to set this now? [Y]")
@@ -27,6 +27,7 @@ except IndexError, TypeError:
     if i not in ('', 'Y'):
         sys.exit(1)
 
+    CONFIG = {}
     CONFIG["URL"] = input("What is your /api URL? ")
 
     f.seek(0)
@@ -57,7 +58,7 @@ def post_data(action, json_dict={}, data_tuple=None):
         "headers": (
             "headers",
             bytes(
-                payload,
+                json.dumps(payload),
                 "utf-8"),
             "application/json")}
 
@@ -65,6 +66,7 @@ def post_data(action, json_dict={}, data_tuple=None):
         payload["data"] = data_tuple
 
     m = MultipartEncoder(payload)
+    print(m.to_string())
 
     response = requests.post(
         ROOT_URL,
