@@ -12,21 +12,20 @@ import yaml
 
 try:
     f = open(expanduser("~/.ll_config"), "r+")
-except OSError:
+except OSError, IOError:
     print("No config file found at: " + expanduser("~/.ll_config"))
     sys.exit(1)
 
 CONFIG = yaml.load(f)
 try:
     ROOT_URL = CONFIG["URL"]
-except IndexError:
+except IndexError, TypeError:
     print("No URL setting found in " + expanduser("~/.ll_config"))
 
     i = input("Do you want to set this now? [Y]")
 
     if i not in ('', 'Y'):
         sys.exit(1)
-        return
 
     CONFIG["URL"] = input("What is your /api URL? ")
 
@@ -41,7 +40,6 @@ f.close()
 if not re.match("^https?://.*/|\?api$", ROOT_URL):
     print("Invalid URL passed")
     sys.exit(1)
-    return
 
 
 def post_data(action, json_dict={}, data_tuple=None):
