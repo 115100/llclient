@@ -3,7 +3,7 @@ Set of functions for load.link (https://github.com/deuiore/load.link) API
 """
 import json
 from os import remove
-from os.path import expanduser, isfile
+from os.path import basename, expanduser, isfile
 from requests_toolbelt import MultipartEncoder
 import re
 import requests
@@ -146,7 +146,7 @@ def upload(file_path):
     """
     with open(file_path, 'rb') as f:
 
-        file_name = file_path.split('/')[-1]
+        file_name = basename(file_path)
 
         response = post_data("upload", {"filename": file_name}, ("data", f, ''))
 
