@@ -145,7 +145,10 @@ def upload(file_path):
         Upload file file_path
     """
     with open(file_path, 'rb') as f:
-        response = post_data("upload", {"filename": file_path}, ("data", f, ''))
+
+        file_name = file_path.split('/')[-1]
+
+        response = post_data("upload", {"filename": file_name}, ("data", f, ''))
 
     if response.status_code == 202:
         print("Failed to upload " + file_path)
