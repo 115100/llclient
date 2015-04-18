@@ -66,14 +66,15 @@ def post_data(action, json_dict={}, data_tuple=None):
         payload["data"] = data_tuple
 
     m = MultipartEncoder(payload)
+    print(m.to_string())
 
     response = requests.post(
         ROOT_URL,
-        data=m,
+        data=bytes(m.to_string(), "utf-8"),
         headers={
             "content-type": m.content_type})
 
-    if response.status_code >= 200:
+    if response.status_code >= 300:
         raise Exception(
             "Error {error_code} with {action}: {error}".format(
                 error_code=response.status_code,
