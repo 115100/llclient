@@ -66,7 +66,6 @@ def post_data(action, json_dict={}, data_tuple=None):
         payload["data"] = data_tuple
 
     m = MultipartEncoder(payload)
-    print(m.to_string())
 
     response = requests.post(
         ROOT_URL,
