@@ -83,9 +83,6 @@ def post_data(action, json_dict={}, data_tuple=None):
                 action=action,
                 error=response.text))
 
-   if response.status_code not in (200, 201):
-       print("Error: %s" % response.json()["message"])
-
     return response
 
 
