@@ -12,10 +12,10 @@ from ll_functions import upload
 def upload_all_files():
 
     if "cygwin" in platform.platform().lower():
-        clipboard = "/dev/clipboard"
+        clipboard = "> /dev/clipboard"
         sound = "cat completed.wav > /dev/dsp"
     else:
-        clipboard = "xclip"
+        clipboard = "| xclip"
         sound = "aplay completed.wav"
 
     while True:
@@ -28,7 +28,7 @@ def upload_all_files():
             if upload_link:
                 print(upload_link)
                 subprocess.Popen(
-                        "echo %s > %s" % (upload_link, clipboard),
+                        "echo %s %s" % (upload_link, clipboard),
                         shell=True)
                 subprocess.Popen(sound, shell=True)
                 os.remove(file)
