@@ -26,12 +26,15 @@ def upload_all_files():
             upload_link = upload(file)
 
             if upload_link:
-                print(upload_link)
-                subprocess.Popen(
-                        "echo %s %s" % (upload_link, clipboard),
-                        shell=True)
-                subprocess.Popen(sound, shell=True)
-                os.remove(file)
+                try:
+                    print(upload_link)
+                    subprocess.Popen(
+                            "echo %s %s" % (upload_link, clipboard),
+                            shell=True)
+                    subprocess.Popen(sound, shell=True)
+                    os.remove(file)
+                except KeyboardInterrupt:
+                    os.remove(file)
 
         sleep(0.5)
 
