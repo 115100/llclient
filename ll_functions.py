@@ -1,6 +1,7 @@
 ﻿"""
 Set of functions for load.link (https://github.com/deuiore/load.link) API
 """
+from getpass import getpass
 import json
 from os import remove
 from os.path import basename, expanduser, isfile
@@ -97,7 +98,7 @@ def get_token(token_path=expanduser("~/.ll_token")):
                 return token
 
     username = input("What is your username? ")
-    password = input("What is your password? ")
+    password = getpass("What is your password? ")
 
     response = post_data(
         "get_token", {

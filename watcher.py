@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import glob
-from time import sleep
 import os
 import platform
 import subprocess
 import sys
 sys.path.insert(0, os.getcwd())
+from time import sleep
 
 from ll_functions import upload
 
