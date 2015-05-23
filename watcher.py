@@ -29,7 +29,7 @@ def upload_all_files():
                 try:
                     print(upload_link)
                     subprocess.Popen(
-                            "echo %s %s" % (upload_link, clipboard),
+                            "echo -n %s %s" % (upload_link, clipboard),
                             shell=True)
                     subprocess.Popen(sound, shell=True)
                     os.remove(file)
