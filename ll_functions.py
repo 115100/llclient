@@ -33,7 +33,7 @@ except (IndexError, TypeError):
 
     f.seek(0)
     f.truncate()
-    f.write(yaml.dump(CONFIG))
+    f.write(yaml.dump(CONFIG, default_flow_style=False))
 
     ROOT_URL = CONFIG["URL"]
 
@@ -180,7 +180,7 @@ def edit_settings(settings_dict):
     """
         Edit load.link settings
     """
-    password = input("What is your password? ")
+    password = getpass("What is your password? ")
 
     response = post_data(
         "edit_settings", {
