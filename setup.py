@@ -12,7 +12,7 @@ with open("requirements.txt") as fp:
 
 setup(
     name="untz_manager",
-    version="0.0.1a",
+    version="0.1.0",
     zip_safe=False,
     packages=find_packages(),
     install_requires=reqs,
