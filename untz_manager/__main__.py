@@ -2,7 +2,7 @@
 import argparse
 
 
-def args():
+def get_args():
     """Parse and return arguments."""
     parser = argparse.ArgumentParser(description='Convert FLACs to OGGs and '
                                                  'sort into a sensible folder hierarchy.')
@@ -33,5 +33,5 @@ def args():
 
 def main():
     """Main logic for untz."""
-    arguments = args()
-    print(arguments)
+    args = get_args()
+    print(args)
