@@ -18,6 +18,8 @@ Afterwards, install this package with
 python setup.py install
 ```
 
+Will install untz and the [Pytaglib](https://github.com/supermihi/pytaglib) dependency.
+
 ## Usage
 
 ```bash
