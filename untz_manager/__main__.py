@@ -3,9 +3,9 @@ import argparse
 import logging
 import multiprocessing
 import os
-import shutil
 
 from .encoder import encode_file
+from .utils import preflight_checks, recursive_file_search
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,19 +44,6 @@ def get_args():
     return parser.parse_args()
 
 
-def _preflight_checks():
-    if not shutil.which('oggenc'):
-        raise FileNotFoundError('Oggenc must be in $PATH and be executable.')
-    if not shutil.which('flac'):
-        raise FileNotFoundError('Flac must be in $PATH and be executable.')
-
-
-def _recursive_file_search(entry):
-    for root, _, files in os.walk(entry):
-        for file_entry in files:
-            yield os.path.join(root, file_entry)
-
-
 def _encode_on_filter(args, queue):
     while True:
         file_entry = queue.get()
@@ -76,7 +63,7 @@ def _encode_on_filter(args, queue):
 def main():
     """Main logic for untz."""
     args = get_args()
-    _preflight_checks()
+    preflight_checks()
 
     queue = multiprocessing.Queue()
     processes = [multiprocessing.Process(target=_encode_on_filter,
@@ -87,7 +74,7 @@ def main():
 
     for i in args.inputs:
         if os.path.isdir(i):
-            for file_entry in _recursive_file_search(i):
+            for file_entry in recursive_file_search(i):
                 LOGGER.debug('Encoding "%s"', file_entry)
                 queue.put_nowait(file_entry)
         else:
