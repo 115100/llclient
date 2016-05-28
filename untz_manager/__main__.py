@@ -1,8 +1,10 @@
 """Main entry point for untz."""
 import argparse
 import logging
-import multiprocessing
+from multiprocessing import cpu_count
+import threading
 import os
+from queue import Queue
 import signal
 import sys
 
@@ -11,8 +13,8 @@ from .encoder import apply_gain, encode_file
 from .utils import preflight_checks, recursive_file_search
 
 LOGGER = logging.getLogger(__name__)
-processes = [] # pylint: disable=C0103
-event_flag = multiprocessing.Event() # pylint: disable=C0103
+threads = [] # pylint: disable=C0103
+event_flag = threading.Event() # pylint: disable=C0103
 
 
 def get_args():
@@ -46,7 +48,7 @@ def get_args():
     parser.add_argument('-t', '--threads',
                         dest='threads',
                         type=int,
-                        default=multiprocessing.cpu_count(),
+                        default=cpu_count(),
                         help='Thread pool size to spawn.')
     parser.add_argument('-v', '--verbose',
                         action='store_true',
@@ -81,8 +83,8 @@ def _shutdown(signum, _):
     # Finish after current transcode is done per thread.
     event_flag.clear()
 
-    for process in processes:
-        process.join()
+    for thread in threads:
+        thread.join()
 
     # Abnormal exit
     sys.exit(signum)
@@ -97,18 +99,18 @@ def main():
 
     preflight_checks()
 
-    queue = multiprocessing.Queue()
+    queue = Queue()
 
     LOGGER.info('Starting %d threads.', args.threads)
 
     for i in range(args.threads):
-        processes.append(multiprocessing.Process(target=_encode_on_filter,
-                                                 args=(args, queue)))
+        threads.append(threading.Thread(target=_encode_on_filter,
+                                        args=(args, queue)))
 
     event_flag.set()
 
-    for process in processes:
-        process.start()
+    for thread in threads:
+        thread.start()
 
     # Register signal
     signal.signal(signal.SIGINT, _shutdown)
@@ -129,8 +131,8 @@ def main():
         queue.put(None)
 
     LOGGER.info('Waiting for processes to die.')
-    for process in processes:
-        process.join()
+    for thread in threads:
+        thread.join()
 
     if args.replaygain:
         apply_gain(args.base_dir)
