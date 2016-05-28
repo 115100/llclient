@@ -38,7 +38,15 @@ def _get_vorbis_comments(audio_file, pattern):
 
 
 def encode_file(audio_file, base_dir, pattern, quality, passthrough):
-    """Run oggenc and encode file, storing in a logical manner."""
+    """Run oggenc and encode file, storing in a logical manner.
+
+    Args:
+        audio_file (str): Path to input audio file.
+        base_dir (str): Base output directory.
+        pattern (str): Output file name template.
+        quality (float/int): Constant quality factor for oggenc.
+        passthrough (str): Additional CLI arguments for oggenc.
+    """
 
     process_args = ['oggenc',
                     '-q', str(quality),
