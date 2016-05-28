@@ -73,7 +73,7 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     process.communicate()
 
     if process.returncode:
-        LOGGER.critical('Non-zero return code. Exiting.')
+        LOGGER.critical('Non-zero return code %d. Exiting.', process.returncode)
         os.kill(os.getpid(), signal.SIGTERM)
 
 

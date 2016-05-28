@@ -39,4 +39,4 @@ def main():
     if ARGS.replaygain:
         apply_gain(ARGS.base_dir)
 
-    LOGGER.warning('Program exiting now.')
+    LOGGER.info('Program exiting now.')
