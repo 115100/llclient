@@ -76,7 +76,7 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
 
     if process.returncode:
         LOGGER.critical('Non-zero return code. Exiting.')
-        os.kill(os.getppid(), signal.SIGTERM)
+        os.kill(os.getpid(), signal.SIGTERM)
 
 
 def apply_gain(base_dir):
