@@ -6,6 +6,7 @@ import os
 import signal
 import sys
 
+from . import __version__
 from .encoder import apply_gain, encode_file
 from .utils import preflight_checks, recursive_file_search
 
@@ -51,6 +52,10 @@ def get_args():
                         action='store_true',
                         dest='verbose',
                         help='Set verbose logging.')
+    parser.add_argument('-V', '--version',
+                        action='version',
+                        version=__version__,
+                        help='Print version and exit.')
     parser.add_argument(dest='inputs', help='List of folder/file inputs.', nargs='+')
 
     return parser.parse_args()
