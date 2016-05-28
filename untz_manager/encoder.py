@@ -4,10 +4,12 @@ import os
 import signal
 import subprocess
 import sys
+import threading
 
 import taglib
 
 LOGGER = logging.getLogger(__name__)
+LOCK = threading.Condition()
 
 
 def _get_vorbis_comments(audio_file, pattern):
@@ -40,6 +42,15 @@ def _get_vorbis_comments(audio_file, pattern):
     return oggenc_macros
 
 
+def _create_subdirectories(filename):
+    """Acquire lock and create subdirectories recursively."""
+    with LOCK:
+        target_path = os.path.dirname(filename)
+        if not os.path.exists(target_path):
+            os.makedirs(target_path)
+            LOGGER.debug('Created "%s".', target_path)
+
+
 def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     """Run oggenc and encode file, storing in a logical manner.
 
@@ -67,6 +78,8 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     if passthrough:
         process_args.append(passthrough)
     process_args.append(audio_file)
+
+    _create_subdirectories(output_filename)
 
     LOGGER.debug('Running "%s"', ' '.join(process_args))
     process = subprocess.Popen(process_args)
