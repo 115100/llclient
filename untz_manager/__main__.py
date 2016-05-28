@@ -8,7 +8,6 @@ from .utils import get_args, preflight_checks, recursive_file_search
 
 ARGS = get_args()
 LOGGER = logging.getLogger(__name__)
-threads = [] # pylint: disable=C0103
 
 
 def _encode_on_filter(file_entry):
