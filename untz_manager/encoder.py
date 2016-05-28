@@ -37,13 +37,13 @@ def _get_vorbis_comments(audio_file, pattern):
     return vorbis_comments
 
 
-def encode_file(audio_file, output_dir, pattern, quality, passthrough):
+def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     """Run oggenc and encode file, storing in a logical manner."""
 
     process_args = ['oggenc',
                     '-q', str(quality),
-                    '-n', '{output_dir}/%a/%l/{pattern}.ogg'.format(output_dir=output_dir,
-                                                                    pattern=pattern)]
+                    '-n', '{base_dir}/%a/%l/{pattern}.ogg'.format(base_dir=base_dir,
+                                                                  pattern=pattern)]
 
     if passthrough:
         process_args.append(passthrough)
