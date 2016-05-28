@@ -7,15 +7,17 @@ Usage:
 """
 from setuptools import setup, find_packages
 
+from untz_manager import __version__
+
 with open("requirements.txt") as fp:
-    reqs = fp.read().splitlines()
+    REQS = fp.read().splitlines()
 
 setup(
     name="untz_manager",
-    version="0.1.0",
+    version=__version__,
     zip_safe=False,
     packages=find_packages(),
-    install_requires=reqs,
+    install_requires=REQS,
     entry_points={
         "console_scripts": [
             "untz = untz_manager.__main__:main",
