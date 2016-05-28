@@ -1,5 +1,7 @@
 """Encoding related operations"""
 import logging
+import os
+import signal
 import subprocess
 import sys
 
@@ -72,7 +74,7 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
 
     if process.returncode:
         LOGGER.critical('Non-zero return code. Exiting.')
-        sys.exit(process.returncode)
+        os.kill(os.getppid(), signal.SIGTERM)
 
 
 def apply_gain(base_dir):

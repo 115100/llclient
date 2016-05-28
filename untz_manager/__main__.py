@@ -3,11 +3,15 @@ import argparse
 import logging
 import multiprocessing
 import os
+import signal
+import sys
 
 from .encoder import apply_gain, encode_file
 from .utils import preflight_checks, recursive_file_search
 
 LOGGER = logging.getLogger(__name__)
+processes = [] # pylint: disable=C0103
+event_flag = multiprocessing.Event() # pylint: disable=C0103
 
 
 def get_args():
@@ -53,7 +57,7 @@ def get_args():
 
 
 def _encode_on_filter(args, queue):
-    while True:
+    while event_flag.is_set():
         file_entry = queue.get()
 
         # FIFO queue so we can do this
@@ -68,6 +72,16 @@ def _encode_on_filter(args, queue):
                         args.quality,
                         args.ogg_cli_parameters)
 
+def _shutdown(signum, _):
+    # Finish after current transcode is done per thread.
+    event_flag.clear()
+
+    for process in processes:
+        process.join()
+
+    # Abnormal exit
+    sys.exit(signum)
+
 
 def main():
     """Main logic for untz."""
@@ -81,11 +95,19 @@ def main():
     queue = multiprocessing.Queue()
 
     LOGGER.info('Starting %d threads.', args.threads)
-    processes = [multiprocessing.Process(target=_encode_on_filter,
-                                         args=(args, queue)) for i in range(args.threads)]
+
+    for i in range(args.threads):
+        processes.append(multiprocessing.Process(target=_encode_on_filter,
+                                                 args=(args, queue)))
+
+    event_flag.set()
 
     for process in processes:
         process.start()
+
+    # Register signal
+    signal.signal(signal.SIGINT, _shutdown)
+    signal.signal(signal.SIGTERM, _shutdown)
 
     for i in args.inputs:
         if os.path.isdir(i):
