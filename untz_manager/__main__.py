@@ -35,7 +35,7 @@ def get_args():
                         help='Sets encoding quality to n, between -1 (low) and 10 (high). '
                              'Fractional quality levels such as 2.5 are permitted.')
     parser.add_argument('-r', '--replaygain',
-                        dest='replygain',
+                        dest='replaygain',
                         action='store_true',
                         help='Apply replaygain tags with vorbisgain.')
     parser.add_argument('-t', '--threads',
