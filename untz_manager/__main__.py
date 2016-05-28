@@ -4,7 +4,7 @@ import logging
 import multiprocessing
 import os
 
-from .encoder import encode_file
+from .encoder import apply_gain, encode_file
 from .utils import preflight_checks, recursive_file_search
 
 LOGGER = logging.getLogger(__name__)
@@ -34,6 +34,10 @@ def get_args():
                         default=10,
                         help='Sets encoding quality to n, between -1 (low) and 10 (high). '
                              'Fractional quality levels such as 2.5 are permitted.')
+    parser.add_argument('-r', '--replaygain',
+                        dest='replygain',
+                        action='store_true',
+                        help='Apply replaygain tags with vorbisgain.')
     parser.add_argument('-t', '--threads',
                         dest='threads',
                         type=int,
@@ -100,5 +104,8 @@ def main():
     LOGGER.info('Waiting for processes to die.')
     for process in processes:
         process.join()
+
+    if args.replaygain:
+        apply_gain(args.base_dir)
 
     LOGGER.warning('Program exiting now.')

@@ -71,3 +71,17 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     if process.returncode:
         LOGGER.critical('Non-zero return code. Exiting.')
         sys.exit(process.returncode)
+
+
+def apply_gain(base_dir):
+    """Run vorbisgain on the given folder.
+
+    Args:
+        base_dir (str): Directory to recursively apply vorbisgain to.
+    """
+    process = subprocess.Popen(['vorbisgain', '-asfr', base_dir])
+    process.communicate()
+
+    if process.returncode:
+        LOGGER.critical('Non-zero return code. Exiting.')
+        sys.exit(process.returncode)
