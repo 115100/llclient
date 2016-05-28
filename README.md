@@ -1,5 +1,15 @@
 # Encode and organise your music collection
 
+Transcodes Flac to Ogg and stores to any given directory in a hierarchical structure.
+
+```
+root/
+|-- artist/
+    |-- album/
+        |-- 1 - Foo.ogg
+        |-- 2 - Bar.ogg
+```
+
 ## Setup instructions
 
 I have only run this in a Linux environment under Python 3.5.1.
@@ -18,7 +28,7 @@ Afterwards, install this package with
 python setup.py install
 ```
 
-Will install untz and the [Pytaglib](https://github.com/supermihi/pytaglib) dependency.
+which will install untz and the [Pytaglib](https://github.com/supermihi/pytaglib) dependency.
 
 ## Usage
 
