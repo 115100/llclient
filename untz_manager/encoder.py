@@ -16,12 +16,7 @@ def _get_vorbis_comments(audio_file, pattern):
               ('%t', 'TITLE'),
               ('%d', 'DATE'))
 
-    params_dict = {'%g': '-G',
-                   '%n': '-N',
-                   '%t': '-t',
-                   '%d': '-d'}
-
-    vorbis_comments = {}
+    oggenc_macros = {}
 
     afp = taglib.File(audio_file) # pylint: disable=E1103
 
@@ -29,20 +24,20 @@ def _get_vorbis_comments(audio_file, pattern):
 
     for macro, tag in macros:
         if macro in pattern:
-            vorbis_comments[params_dict[macro]] = afp.tags.get(tag, [None])[0] or '(none)'
+            oggenc_macros[macro] = afp.tags.get(tag, [None])[0] or '(none)'
 
-    vorbis_comments['-a'] = (afp.tags.get('ALBUM_ARTIST', [None])[0] or
-                             afp.tags.get('ALBUMARTIST', [None])[0] or
-                             afp.tags.get('ALBUM ARTIST', [None])[0] or
-                             afp.tags.get('COMPOSER', [None])[0] or
-                             afp.tags.get('PERFORMER', [None])[0] or
-                             afp.tags.get('ARTIST', [None])[0] or
-                             'Unknown artist')
-    vorbis_comments['-l'] = afp.tags.get('ALBUM', [None])[0] or 'Unknown album'
+    oggenc_macros['%a'] = (afp.tags.get('ALBUM_ARTIST', [None])[0] or
+                           afp.tags.get('ALBUMARTIST', [None])[0] or
+                           afp.tags.get('ALBUM ARTIST', [None])[0] or
+                           afp.tags.get('COMPOSER', [None])[0] or
+                           afp.tags.get('PERFORMER', [None])[0] or
+                           afp.tags.get('ARTIST', [None])[0] or
+                           'Unknown artist')
+    oggenc_macros['%l'] = afp.tags.get('ALBUM', [None])[0] or 'Unknown album'
 
     afp.close()
 
-    return vorbis_comments
+    return oggenc_macros
 
 
 def encode_file(audio_file, base_dir, pattern, quality, passthrough):
@@ -58,18 +53,19 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
 
     process_args = ['oggenc',
                     '-q', str(quality),
-                    '-n', '{base_dir}/%a/%l/{pattern}.ogg'.format(base_dir=base_dir,
-                                                                  pattern=pattern)]
+                    '-n']
+
+    oggenc_macros = _get_vorbis_comments(audio_file, pattern)
+
+    # Handle patterns on our side.
+    output_filename = '{base_dir}/%a/%l/{pattern}.ogg'.format(base_dir=base_dir, pattern=pattern)
+
+    for macro, value in oggenc_macros.items():
+        output_filename = output_filename.replace(macro, value)
+    process_args.append(output_filename)
 
     if passthrough:
         process_args.append(passthrough)
-
-    vorbis_comments = _get_vorbis_comments(audio_file, pattern)
-
-    for tag, value in vorbis_comments.items():
-        process_args.append(tag)
-        process_args.append(value)
-
     process_args.append(audio_file)
 
     LOGGER.debug('Running "%s"', ' '.join(process_args))
