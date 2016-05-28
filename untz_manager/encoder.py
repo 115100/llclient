@@ -22,7 +22,7 @@ def _get_vorbis_comments(audio_file, pattern):
 
     afp = taglib.File(audio_file) # pylint: disable=E1103
 
-    LOGGER.debug('Tags: %s', afp.tags)
+    LOGGER.debug('Tags: "%s".', afp.tags)
 
     for macro, tag in macros:
         if macro in pattern:
@@ -81,7 +81,7 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
 
     _create_subdirectories(output_filename)
 
-    LOGGER.debug('Running "%s"', ' '.join(process_args))
+    LOGGER.debug('Running "%s".', ' '.join(process_args))
     process = subprocess.Popen(process_args)
     process.communicate()
 

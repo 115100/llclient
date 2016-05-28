@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 
 def _encode_on_filter(file_entry):
     if file_entry.lower().endswith('.flac'):
-        LOGGER.info('Encoding "%s"', file_entry)
+        LOGGER.info('Encoding "%s".', file_entry)
         encode_file(file_entry,
                     ARGS.base_dir.rstrip('/'),
                     ARGS.pattern,
