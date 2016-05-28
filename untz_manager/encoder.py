@@ -34,6 +34,8 @@ def _get_vorbis_comments(audio_file, pattern):
     vorbis_comments['-a'] = (afp.tags.get('ALBUM_ARTIST', [None])[0] or
                              afp.tags.get('ALBUMARTIST', [None])[0] or
                              afp.tags.get('ALBUM ARTIST', [None])[0] or
+                             afp.tags.get('COMPOSER', [None])[0] or
+                             afp.tags.get('PERFORMER', [None])[0] or
                              afp.tags.get('ARTIST', [None])[0] or
                              'Unknown artist')
     vorbis_comments['-l'] = afp.tags.get('ALBUM', [None])[0] or 'Unknown album'
