@@ -39,6 +39,10 @@ def get_args():
                         type=int,
                         default=multiprocessing.cpu_count(),
                         help='Thread pool size to spawn.')
+    parser.add_argument('-v', '--verbose',
+                        action='store_true',
+                        dest='verbose',
+                        help='Set verbose logging.')
     parser.add_argument(dest='inputs', help='List of folder/file inputs.', nargs='+')
 
     return parser.parse_args()
@@ -64,6 +68,10 @@ def _encode_on_filter(args, queue):
 def main():
     """Main logic for untz."""
     args = get_args()
+
+    if args.verbose:
+        LOGGER.setLevel(logging.DEBUG)
+
     preflight_checks()
 
     queue = multiprocessing.Queue()
