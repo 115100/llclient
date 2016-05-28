@@ -27,5 +27,3 @@ def recursive_file_search(entry):
     for root, _, files in os.walk(entry):
         for file_entry in files:
             yield os.path.join(root, file_entry)
-
-
