@@ -26,8 +26,11 @@ def _get_vorbis_comments(audio_file, pattern):
     for macro, tag in macros:
         if macro in pattern:
             vorbis_comments[params_dict[macro]] = afp.tags.get(tag)[0] or '(none)'
-    vorbis_comments['-a'] = afp.tags.get('ARTIST')[0] or 'Unknown artist'
-    vorbis_comments['-l'] = afp.tags.get('ALBUM')[0] or 'Unknown album'
+
+    vorbis_comments['-a'] = (afp.tags.get('ALBUM ARTIST', [None])[0] or
+                             afp.tags.get('ARTIST', [None])[0] or
+                             'Unknown artist')
+    vorbis_comments['-l'] = afp.tags.get('ALBUM', [None])[0] or 'Unknown album'
 
     afp.close()
 
