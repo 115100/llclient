@@ -74,7 +74,7 @@ def main():
     args = get_args()
 
     if args.verbose:
-        LOGGER.setLevel(logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
 
     preflight_checks()
 
