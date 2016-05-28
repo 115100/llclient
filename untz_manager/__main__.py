@@ -50,6 +50,7 @@ def _encode_on_filter(args, queue):
 
         # FIFO queue so we can do this
         if file_entry is None:
+            LOGGER.info("PID %d received poison signal. Breaking.", os.getpid())
             break
 
         if file_entry.lower().endswith('.flac'):
@@ -66,6 +67,8 @@ def main():
     preflight_checks()
 
     queue = multiprocessing.Queue()
+
+    LOGGER.info('Starting %d threads.', args.threads)
     processes = [multiprocessing.Process(target=_encode_on_filter,
                                          args=(args, queue)) for i in range(args.threads)]
 
