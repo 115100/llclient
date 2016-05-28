@@ -1,6 +1,6 @@
 # Encode and organise your music collection
 
-Transcodes Flac to Ogg and stores to any given directory in a hierarchical structure.
+Transcodes Flac to Vorbis and stores to any given directory in a hierarchical structure.
 
 ```
 root/
