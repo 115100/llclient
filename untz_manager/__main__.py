@@ -1,20 +1,16 @@
 """Main entry point for untz."""
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import logging
-from multiprocessing import cpu_count
-import threading
 import os
-from queue import Queue
-import signal
-import sys
 
 from . import __version__
 from .encoder import apply_gain, encode_file
 from .utils import preflight_checks, recursive_file_search
 
+ARGS = get_args()
 LOGGER = logging.getLogger(__name__)
 threads = [] # pylint: disable=C0103
-event_flag = threading.Event() # pylint: disable=C0103
 
 
 def get_args():
@@ -64,77 +60,31 @@ def get_args():
 
 
 def _encode_on_filter(args, queue):
-    while event_flag.is_set():
-        file_entry = queue.get()
-
-        # FIFO queue so we can do this
-        if file_entry is None:
-            LOGGER.info("PID %d received poison signal. Breaking.", os.getpid())
-            break
-
-        if file_entry.lower().endswith('.flac'):
-            encode_file(file_entry,
-                        args.base_dir.rstrip('/'),
-                        args.pattern,
-                        args.quality,
-                        args.ogg_cli_parameters)
-
-def _shutdown(signum, _):
-    # Finish after current transcode is done per thread.
-    event_flag.clear()
-
-    for thread in threads:
-        thread.join()
-
-    # Abnormal exit
-    sys.exit(signum)
+    if file_entry.lower().endswith('.flac'):
+        encode_file(file_entry,
+                    ARGS.base_dir.rstrip('/'),
+                    ARGS.pattern,
+                    ARGS.quality,
+                    ARGS.ogg_cli_parameters)
 
 
 def main():
     """Main logic for untz."""
-    args = get_args()
 
-    if args.verbose:
+    if ARGS.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
     preflight_checks()
 
-    queue = Queue()
+    LOGGER.info('Starting %d threads.', ARGS.threads)
+    with ThreadPoolExecutor(max_workers=ARGS.threads) as tpe:
+        for i in ARGS.inputs:
+            if os.path.isdir(i):
+                tpe.map(_encode_on_filter, recursive_file_search(i))
+            else:
+                tpe.submit(_encode_on_filter, i)
 
-    LOGGER.info('Starting %d threads.', args.threads)
-
-    for i in range(args.threads):
-        threads.append(threading.Thread(target=_encode_on_filter,
-                                        args=(args, queue)))
-
-    event_flag.set()
-
-    for thread in threads:
-        thread.start()
-
-    # Register signal
-    signal.signal(signal.SIGINT, _shutdown)
-    signal.signal(signal.SIGTERM, _shutdown)
-
-    for i in args.inputs:
-        if os.path.isdir(i):
-            for file_entry in recursive_file_search(i):
-                LOGGER.debug('Encoding "%s"', file_entry)
-                queue.put_nowait(file_entry)
-        else:
-            LOGGER.debug('Encoding "%s"', i)
-            queue.put(i)
-
-    # Send stop signal
-    LOGGER.debug('Sending poison signal.')
-    for _ in range(args.threads):
-        queue.put(None)
-
-    LOGGER.info('Waiting for processes to die.')
-    for thread in threads:
-        thread.join()
-
-    if args.replaygain:
-        apply_gain(args.base_dir)
+    if ARGS.replaygain:
+        apply_gain(ARGS.base_dir)
 
     LOGGER.warning('Program exiting now.')
