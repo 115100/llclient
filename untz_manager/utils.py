@@ -13,7 +13,8 @@ def get_args():
                                                  'sort into a sensible folder hierarchy.')
     parser.add_argument('-b', '--base',
                         dest='base_dir',
-                        help='Base directory to store output files to.', required=True)
+                        help='Base directory to store output files to.',
+                        required=True)
     parser.add_argument('-n', '--names',
                         default='%n - %t',
                         dest='pattern',

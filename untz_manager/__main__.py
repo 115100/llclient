@@ -23,7 +23,6 @@ def _encode_on_filter(file_entry):
 
 def main():
     """Main logic for untz."""
-
     if ARGS.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
