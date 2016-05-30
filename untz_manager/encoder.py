@@ -72,7 +72,8 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     output_filename = '{base_dir}/%a/%l/{pattern}.ogg'.format(base_dir=base_dir, pattern=pattern)
 
     for macro, value in oggenc_macros.items():
-        output_filename = output_filename.replace(macro, value)
+        output_filename = output_filename.replace(macro,
+                                                  ' '.join([s.strip() for s in value.split('/')]))
     process_args.append(output_filename)
 
     if passthrough:
