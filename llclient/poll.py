@@ -27,6 +27,7 @@ class _UploadHandler(PatternMatchingEventHandler):
 
     def on_created(self, event):
         ul_fn = event.src_path
+        _, ext = splitext(event.src_path)
         if ext == '.png':
             _, tmp_fn = tempfile.mkstemp()
             with Image(filename=event.src_path) as img:
