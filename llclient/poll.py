@@ -17,13 +17,19 @@ from .service import Service
 
 class _UploadHandler(PatternMatchingEventHandler):
     def __init__(self, args, patterns=None, ignore_patterns=None, case_sensitive=False, ignore_directories=True):
-        super(_UploadHandler, self).__init__(patterns, ignore_patterns, case_sensitive)
+        super(_UploadHandler, self).__init__(
+            patterns=patterns,
+            ignore_patterns=ignore_patterns,
+            ignore_directories=ignore_directories,
+            case_sensitive=case_sensitive
+        )
         self.service = Service()
-        self.sound = self._init_sound()
 
         self.volume = args.volume
         self.sound = None
         self.new_wav = None
+
+        self._init_sound()
 
     def on_created(self, event):
         ul_fn = event.src_path
@@ -42,7 +48,7 @@ class _UploadHandler(PatternMatchingEventHandler):
         print('\nUploaded {} to {}'.format(event.src_path, link))
         subprocess.Popen('echo -n %s | xclip' % link, shell=True)
         if self.sound:
-            subprocess.Popen('aplay ' + self.sound, shell=True)
+            subprocess.Popen('aplay -q ' + self.sound, shell=True)
 
     def cleanup(self):
         if self.new_wav:
