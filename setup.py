@@ -1,5 +1,12 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-setup(name="ll_functions",
+setup(name="llclient",
       version="1.0",
-      py_modules=["ll_functions"])
+      zip_safe=False,
+      packages=find_packages(),
+      entry_points={
+        "console_scripts": [
+            "llclient = llclient.poll:main",
+        ],
+      }
+)

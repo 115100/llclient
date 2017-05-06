@@ -2,12 +2,14 @@
 """
 from getpass import getpass
 import json
-from os import remove
-from os.path import basename, expanduser, isfile
-from requests_toolbelt import MultipartEncoder
+import os
+from os.path import basename, dirname, expanduser, isfile
 import re
-import requests
 import sys
+
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from clint.textui.progress import Bar as ProgressBar
+import requests
 import yaml
 
 
@@ -21,11 +23,12 @@ class Service:
         """Attempt to open config file and read values
         needed to access load.link.
         """
-        config_file = config_file or expanduser('~/.ll_config')
+        config_file = config_file or expanduser('~/.config/llclient/config')
         try:
             fp = open(config_file, 'r+')
         except (OSError, IOError):
-            raise Exception('No config file found at: ' + config_file)
+            os.makedirs(dirname(config_file))
+            fp = open(config_file, 'w+')
 
         self._config = yaml.load(fp)
         try:
@@ -114,7 +117,7 @@ class Service:
             return
 
         if self._post_data('release_token').status_code == 200:
-            remove(token_path)
+            os.remove(token_path)
             return
 
         print('Failed to release token')
@@ -128,7 +131,7 @@ class Service:
             return
 
         if self._post_data('release_all_tokens').status_code == 200:
-            remove(token_path)
+            os.remove(token_path)
             return
 
         print('Failed to release all tokens')
@@ -150,17 +153,14 @@ class Service:
             payload['token'] = self._get_token()
 
         payload = {
-            'headers': (
-                'headers',
-                bytes(
-                    json.dumps(payload),
-                    'utf-8'),
-                'application/json')}
+            'headers': ('headers', bytes(json.dumps(payload), 'utf-8'), 'application/json')
+        }
 
         if data_tuple:
             payload['data'] = data_tuple
 
-        me = MultipartEncoder(payload)
+        enc = MultipartEncoder(payload)
+        me = MultipartEncoderMonitor(enc, _prog_cb(enc))
 
         response = requests.post(
             self._root_url,
@@ -202,3 +202,10 @@ class Service:
             f.write(token)
 
         return token
+
+
+def _prog_cb(encoder):
+    bar = ProgressBar(expected_size=encoder.len, filled_char='=')
+    def cb(mon):
+        bar.show(mon.bytes_read)
+    return cb
