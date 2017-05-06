@@ -32,6 +32,7 @@ class _UploadHandler(PatternMatchingEventHandler):
         self._init_sound()
 
     def on_created(self, event):
+        sleep(1)
         ul_fn = event.src_path
         _, ext = splitext(event.src_path)
         if ext == '.png':
