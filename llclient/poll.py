@@ -1,5 +1,5 @@
 import argparse
-from os.path import expanduser, isfile
+from os.path import expanduser, isfile, splitext
 import os
 import struct
 import subprocess
@@ -26,14 +26,19 @@ class _UploadHandler(PatternMatchingEventHandler):
         self.new_wav = None
 
     def on_created(self, event):
-        _, tmp_fn = tempfile.mkstemp()
-        with Image(filename=event.src_path) as img:
-            img.compression_quality = 9
-            img.save(filename=tmp_fn)
-        os.remove(event.src_path)
-        link = self.service.upload(tmp_fn)
+        ul_fn = event.src_path
+        if ext == '.png':
+            _, tmp_fn = tempfile.mkstemp()
+            with Image(filename=event.src_path) as img:
+                img.compression_quality = 9
+                img.save(filename=tmp_fn)
+            ul_fn = tmp_fn
+            os.remove(event.src_path)
+
+        link = self.service.upload(ul_fn)
+        os.remove(ul_fn)
+
         print('\nUploaded {} to {}'.format(event.src_path, link))
-        os.remove(tmp_fn)
         subprocess.Popen('echo -n %s | xclip' % link, shell=True)
         if self.sound:
             subprocess.Popen('aplay ' + self.sound, shell=True)
