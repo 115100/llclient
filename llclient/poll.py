@@ -95,7 +95,7 @@ def main():
             sleep(1)
     except KeyboardInterrupt:
         observer.stop()
-        observer.wait()
+        observer.join()
         handler.cleanup()
         raise
 
