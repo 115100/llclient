@@ -1,5 +1,5 @@
 import argparse
-from os.path import expanduser, isfile, splitext
+from os.path import basename, expanduser, isfile, splitext
 import os
 import struct
 import subprocess
@@ -43,7 +43,7 @@ class _UploadHandler(PatternMatchingEventHandler):
             ul_fn = tmp_fn
             os.remove(event.src_path)
 
-        link = self.service.upload(ul_fn)
+        link = self.service.upload(ul_fn, basename(event.src_path))
         os.remove(ul_fn)
 
         print('\nUploaded {} to {}'.format(event.src_path, link))

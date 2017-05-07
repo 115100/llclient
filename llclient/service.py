@@ -3,7 +3,7 @@
 from getpass import getpass
 import json
 import os
-from os.path import basename, dirname, expanduser, isfile
+from os.path import dirname, expanduser, isfile
 import re
 import sys
 
@@ -74,11 +74,10 @@ class Service:
         return response.json()['thumbnail']
 
 
-    def upload(self, file_path):
+    def upload(self, file_path, filename=''):
         """Upload file `file_path`."""
         with open(file_path, 'rb') as fp:
-            file_name = basename(file_path)
-            response = self._post_data('upload', {'filename': file_name}, ('data', fp, ''))
+            response = self._post_data('upload', {'filename': filename}, ('data', fp, ''))
 
         if response.status_code == 202:
             print('Failed to upload ' + file_path)
