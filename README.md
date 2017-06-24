@@ -8,17 +8,19 @@ Set of Python functions for [load.link](https://github.com/deuiore/load.link)'s 
 [load.link](https://github.com/deuiore/load.link) (duh)
 
 OS applications/libraries
-aplay
-Imagemagick
-xclip
+
+- aplay
+- Imagemagick
+- xclip
 
 Python 3.4+
-numpy
-pyyaml
-requests
-requests-toolbelt
-watchdog
-wand
+
+- numpy
+- pyyaml
+- requests
+- requests-toolbelt
+- watchdog
+- wand
 
 This will not work under Windows, as aplay and xclip aren't available under WSL as of the time of writing.
 
