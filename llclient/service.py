@@ -5,7 +5,6 @@ import json
 import os
 from os.path import dirname, expanduser, isfile
 import re
-import sys
 
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 from clint.textui.progress import Bar as ProgressBar
@@ -25,12 +24,12 @@ class Service:
         """
         config_file = config_file or expanduser('~/.config/llclient/config')
         try:
-            fp = open(config_file, 'r+')
+            cfg = open(config_file, 'r+')
         except (OSError, IOError):
             os.makedirs(dirname(config_file))
-            fp = open(config_file, 'w+')
+            cfg = open(config_file, 'w+')
 
-        self._config = yaml.load(fp)
+        self._config = yaml.load(cfg)
         try:
             self._root_url = self._config['URL']
         except (IndexError, TypeError):
@@ -44,15 +43,15 @@ class Service:
             self._config = {}
             self._config['URL'] = input('What is your /api URL? ')
 
-            fp.seek(0)
-            fp.truncate()
-            fp.write(yaml.dump(self._config, default_flow_style=False))
+            cfg.seek(0)
+            cfg.truncate()
+            cfg.write(yaml.dump(self._config, default_flow_style=False))
 
             self._root_url = self._config['URL']
 
-        fp.close()
+        cfg.close()
 
-        if not re.match('^https?://.*/|\?api$', self._root_url):
+        if not re.match(r'^https?://.*/|\?api$', self._root_url):
             raise Exception('Invalid URL passed')
 
 
@@ -76,8 +75,8 @@ class Service:
 
     def upload(self, file_path, filename=''):
         """Upload file `file_path`."""
-        with open(file_path, 'rb') as fp:
-            response = self._post_data('upload', {'filename': filename}, ('data', fp, ''))
+        with open(file_path, 'rb') as ul_body:
+            response = self._post_data('upload', {'filename': filename}, ('data', ul_body, ''))
 
         if response.status_code == 202:
             print('Failed to upload ' + file_path)
@@ -159,13 +158,13 @@ class Service:
             payload['data'] = data_tuple
 
         enc = MultipartEncoder(payload)
-        me = MultipartEncoderMonitor(enc, _prog_cb(enc))
+        me_monitor = MultipartEncoderMonitor(enc, _prog_cb(enc))
 
         response = requests.post(
             self._root_url,
-            data=me,
+            data=me_monitor,
             headers={
-                'content-type': me.content_type})
+                'content-type': me_monitor.content_type})
 
         try:
             response.raise_for_status()
@@ -183,8 +182,8 @@ class Service:
         or retrieve token from user input.
         """
         if isfile(token_path):
-            with open(token_path, 'r') as f:
-                token = f.readline()
+            with open(token_path, 'r') as tok:
+                token = tok.readline()
                 if token:
                     return token
 
@@ -197,14 +196,14 @@ class Service:
 
         token = response.json()['token']
 
-        with open(token_path, 'w') as f:
-            f.write(token)
+        with open(token_path, 'w') as tok:
+            tok.write(token)
 
         return token
 
 
 def _prog_cb(encoder):
-    bar = ProgressBar(expected_size=encoder.len, filled_char='=')
-    def cb(mon):
-        bar.show(mon.bytes_read)
-    return cb
+    progress_bar = ProgressBar(expected_size=encoder.len, filled_char='=')
+    def callback(mon): # pylint: disable=missing-docstring
+        progress_bar.show(mon.bytes_read)
+    return callback
