@@ -1,2 +1,4 @@
-files/*
-*.pyc
+build/
+dist/
+__pycache__
+*egg-info/
