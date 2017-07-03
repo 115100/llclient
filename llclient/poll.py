@@ -1,7 +1,7 @@
 """Logic for polling and uploading files to load link."""
 import argparse
 import glob
-from os.path import basename, expanduser, isfile, splitext
+from os.path import basename, expanduser, isdir, isfile, splitext
 import os
 import struct
 import subprocess
@@ -46,12 +46,14 @@ class _UploadHandler(PatternMatchingEventHandler):
         self.sound = None
         self.new_wav = None
 
-        try:
-            os.makedirs(args.base_dir, 0o755)
-        except os.error:
-            pass
         self._init_sound()
-        self._reprocess()
+        if isdir(args.base_dir):
+            self._reprocess()
+        else:
+            try:
+                os.makedirs(args.base_dir, 0o755)
+            except os.error: # may arise from races outside of the script
+                pass
 
     def on_created(self, event):
         sleep(1) # Assume file takes at most 1s to finish writing
