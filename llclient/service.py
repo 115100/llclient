@@ -79,8 +79,7 @@ class Service:
             response = self._post_data('upload', {'filename': filename}, ('data', ul_body, ''))
 
         if response.status_code == 202:
-            print('Failed to upload ' + file_path)
-            return
+            raise Exception('Failed to upload {}: {}'.format(file_path, response.text))
         return response.json()['link']
 
 
