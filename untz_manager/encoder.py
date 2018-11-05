@@ -1,6 +1,7 @@
 """Encoding related operations"""
 import logging
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -72,8 +73,7 @@ def encode_file(audio_file, base_dir, pattern, quality, passthrough):
     output_filename = '{base_dir}/%a/%l/{pattern}.ogg'.format(base_dir=base_dir, pattern=pattern)
 
     for macro, value in oggenc_macros.items():
-        output_filename = output_filename.replace(macro,
-                                                  ' '.join([s.strip() for s in value.split('/')]))
+        output_filename = output_filename.replace(macro, re.sub(r"[\"*/:<>?\\|]", "_", value))
     process_args.append(output_filename)
 
     if passthrough:
