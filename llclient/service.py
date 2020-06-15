@@ -29,7 +29,7 @@ class Service:
             os.makedirs(dirname(config_file))
             cfg = open(config_file, "w+")
 
-        self._config = yaml.load(cfg)
+        self._config = yaml.safe_load(cfg)
         try:
             self._root_url = self._config["URL"]
         except (IndexError, TypeError):
