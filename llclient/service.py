@@ -22,139 +22,135 @@ class Service:
         """Attempt to open config file and read values
         needed to access load.link.
         """
-        config_file = config_file or expanduser('~/.config/llclient/config')
+        config_file = config_file or expanduser("~/.config/llclient/config")
         try:
-            cfg = open(config_file, 'r+')
+            cfg = open(config_file, "r+")
         except (OSError, IOError):
             os.makedirs(dirname(config_file))
-            cfg = open(config_file, 'w+')
+            cfg = open(config_file, "w+")
 
         self._config = yaml.load(cfg)
         try:
-            self._root_url = self._config['URL']
+            self._root_url = self._config["URL"]
         except (IndexError, TypeError):
-            print('No URL setting found in ' + config_file)
+            print("No URL setting found in " + config_file)
 
-            i = input('Do you want to set this now? [Y]')
+            i = input("Do you want to set this now? [Y]")
 
-            if i not in ('', 'Y'):
-                raise Exception('Unset configuration')
+            if i not in ("", "Y"):
+                raise Exception("Unset configuration")
 
             self._config = {}
-            self._config['URL'] = input('What is your /api URL? ')
+            self._config["URL"] = input("What is your /api URL? ")
 
             cfg.seek(0)
             cfg.truncate()
             cfg.write(yaml.dump(self._config, default_flow_style=False))
 
-            self._root_url = self._config['URL']
+            self._root_url = self._config["URL"]
 
         cfg.close()
 
-        if not re.match(r'^https?://.*/|\?api$', self._root_url):
-            raise Exception('Invalid URL passed')
-
+        if not re.match(r"^https?://.*/|\?api$", self._root_url):
+            raise Exception("Invalid URL passed")
 
     def get_links(self, limit, offset):
         """Get `limit` links starting from `offset`."""
-        response = self._post_data(
-            'get_links', {'limit': limit, 'offset': offset})
-        return response.json()['links']
-
+        response = self._post_data("get_links", {"limit": limit, "offset": offset})
+        return response.json()["links"]
 
     def count(self):
         """Return count of all uploaded items."""
-        return self._post_data('count').json()['count']
-
+        return self._post_data("count").json()["count"]
 
     def get_thumbnail(self, uid):
         """Return thumbnail and associated details for `uid`."""
-        response = self._post_data('get_thumbnail', {'uid': uid})
-        return response.json()['thumbnail']
+        response = self._post_data("get_thumbnail", {"uid": uid})
+        return response.json()["thumbnail"]
 
-
-    def upload(self, file_path, filename=''):
+    def upload(self, file_path, filename=""):
         """Upload file `file_path`."""
-        with open(file_path, 'rb') as ul_body:
-            response = self._post_data('upload', {'filename': filename}, ('data', ul_body, ''))
+        with open(file_path, "rb") as ul_body:
+            response = self._post_data(
+                "upload", {"filename": filename}, ("data", ul_body, "")
+            )
 
         if response.status_code == 202:
-            raise Exception('Failed to upload {}: {}'.format(file_path, response.text))
-        return response.json()['link']
-
+            raise Exception("Failed to upload {}: {}".format(file_path, response.text))
+        return response.json()["link"]
 
     def shorten_url(self, url):
         """Shorten `url`."""
-        return self._post_data('upload', {'url': url}).json()['link']
-
+        return self._post_data("upload", {"url": url}).json()["link"]
 
     def delete(self, uid):
         """Delete uploaded item `uid`."""
-        if self._post_data('delete', {'uid': uid}).status_code != 200:
-            print('Failed to remove uid: ' + uid)
-
+        if self._post_data("delete", {"uid": uid}).status_code != 200:
+            print("Failed to remove uid: " + uid)
 
     def edit_settings(self, settings_dict):
         """Edit load.link settings.
         """
-        password = getpass('What is your password? ')
+        password = getpass("What is your password? ")
 
         response = self._post_data(
-            'edit_settings', {
-                'password': password, 'settings': json.dumps(settings_dict)})
+            "edit_settings",
+            {"password": password, "settings": json.dumps(settings_dict)},
+        )
         if response.status_code != 200:
-            print('Failed to update settings: ' + response.json()['message'])
+            print("Failed to update settings: " + response.json()["message"])
 
-
-    def release_token(self, token_path=expanduser('~/.ll_token')):
+    def release_token(self, token_path=expanduser("~/.ll_token")):
         """Release token at `token_path` and remove it.
         """
         if not token_path or not isfile(token_path):
-            print(token_path + ' doesn\'t exist to release')
+            print(token_path + " doesn't exist to release")
             return
 
-        if self._post_data('release_token').status_code == 200:
+        if self._post_data("release_token").status_code == 200:
             os.remove(token_path)
             return
 
-        print('Failed to release token')
+        print("Failed to release token")
 
-
-    def release_all_tokens(self, token_path=expanduser('~/.ll_token')):
+    def release_all_tokens(self, token_path=expanduser("~/.ll_token")):
         """Release all authentication tokens and delete `token_path`.
         """
         if not token_path or not isfile(token_path):
-            print(token_path + ' doesn\'t exist to release')
+            print(token_path + " doesn't exist to release")
             return
 
-        if self._post_data('release_all_tokens').status_code == 200:
+        if self._post_data("release_all_tokens").status_code == 200:
             os.remove(token_path)
             return
 
-        print('Failed to release all tokens')
-
+        print("Failed to release all tokens")
 
     def prune_unused(self):
         """Prune unused links."""
-        return self._post_data('prune_unused').json()['pruned']
+        return self._post_data("prune_unused").json()["pruned"]
 
     def _post_data(self, action, json_dict=None, data_tuple=None):
         """Generic function handling all POSTs to /api endpoint.
         """
-        payload = {'action': action}
+        payload = {"action": action}
 
         if json_dict:
             payload.update(json_dict)
 
-        if 'username' not in payload:
-            payload['token'] = self._get_token()
+        if "username" not in payload:
+            payload["token"] = self._get_token()
 
         payload = {
-            'headers': ('headers', bytes(json.dumps(payload), 'utf-8'), 'application/json')
+            "headers": (
+                "headers",
+                bytes(json.dumps(payload), "utf-8"),
+                "application/json",
+            )
         }
 
         if data_tuple:
-            payload['data'] = data_tuple
+            payload["data"] = data_tuple
 
         enc = MultipartEncoder(payload)
         me_monitor = MultipartEncoderMonitor(enc, _prog_cb(enc))
@@ -162,47 +158,49 @@ class Service:
         response = requests.post(
             self._root_url,
             data=me_monitor,
-            headers={
-                'content-type': me_monitor.content_type})
+            headers={"content-type": me_monitor.content_type},
+        )
 
         try:
             response.raise_for_status()
         except:
             raise Exception(
-                'Error {error_code} with {action}: {error}'.format(
-                    error_code=response.status_code,
-                    action=action,
-                    error=response.text))
+                "Error {error_code} with {action}: {error}".format(
+                    error_code=response.status_code, action=action, error=response.text
+                )
+            )
 
         return response
 
-    def _get_token(self, token_path=expanduser('~/.ll_token')):
+    def _get_token(self, token_path=expanduser("~/.ll_token")):
         """Check token_path for token if it exists
         or retrieve token from user input.
         """
         if isfile(token_path):
-            with open(token_path, 'r') as tok:
+            with open(token_path, "r") as tok:
                 token = tok.readline()
                 if token:
                     return token
 
-        username = input('What is your username? ')
-        password = getpass('What is your password? ')
+        username = input("What is your username? ")
+        password = getpass("What is your password? ")
 
         response = self._post_data(
-            'get_token', {
-                'username': username, 'password': password})
+            "get_token", {"username": username, "password": password}
+        )
 
-        token = response.json()['token']
+        token = response.json()["token"]
 
-        with open(token_path, 'w') as tok:
+        with open(token_path, "w") as tok:
             tok.write(token)
 
         return token
 
 
 def _prog_cb(encoder):
-    progress_bar = ProgressBar(expected_size=encoder.len, filled_char='=')
-    def callback(mon): # pylint: disable=missing-docstring
+    progress_bar = ProgressBar(expected_size=encoder.len, filled_char="=")
+
+    def callback(mon):  # pylint: disable=missing-docstring
         progress_bar.show(mon.bytes_read)
+
     return callback
