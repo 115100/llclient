@@ -49,6 +49,7 @@ class _UploadHandler(PatternMatchingEventHandler):
         self.service = Service()
 
         self.base_dir = args.base_dir
+        self.compress = args.compress
         self.volume = args.volume
         self.sound = None
         self.new_wav = None
@@ -75,7 +76,7 @@ class _UploadHandler(PatternMatchingEventHandler):
         ul_fn = path
 
         _, ext = splitext(path)
-        if ext == ".png":
+        if self.compress and ext == ".png":
             _, tmp_fn = tempfile.mkstemp()
             with Image(filename=path) as img:
                 img.compression_quality = 9
@@ -162,5 +163,12 @@ def _parse_args():
         type=int,
         default=100,
         help="Sound notification volume.",
+    )
+    parser.add_argument(
+        "--compress",
+        dest="compress",
+        type=bool,
+        default=False,
+        help="Automatically compress supported files before uploading",
     )
     return parser.parse_args()
