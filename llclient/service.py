@@ -5,9 +5,10 @@ import json
 import os
 from os.path import dirname, expanduser, isfile
 import re
+from typing import Any, Callable, Optional
 
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
-from clint.textui.progress import Bar as ProgressBar
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor # type: ignore
+from clint.textui.progress import Bar as ProgressBar # type: ignore
 import requests
 import yaml
 
@@ -15,10 +16,10 @@ import yaml
 class Service:
     """Utility for quick requests to load.link"""
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file: Optional[str]=None) -> None:
         self._config_reader(config_file)
 
-    def _config_reader(self, config_file):
+    def _config_reader(self, config_file: Optional[str]=None) -> None:
         """Attempt to open config file and read values
         needed to access load.link.
         """
@@ -54,21 +55,21 @@ class Service:
         if not re.match(r"^https?://.*/|\?api$", self._root_url):
             raise Exception("Invalid URL passed")
 
-    def get_links(self, limit, offset):
+    def get_links(self, limit: str, offset: str) -> Any:
         """Get `limit` links starting from `offset`."""
         response = self._post_data("get_links", {"limit": limit, "offset": offset})
         return response.json()["links"]
 
-    def count(self):
+    def count(self) -> Any:
         """Return count of all uploaded items."""
         return self._post_data("count").json()["count"]
 
-    def get_thumbnail(self, uid):
+    def get_thumbnail(self, uid: str) -> Any:
         """Return thumbnail and associated details for `uid`."""
         response = self._post_data("get_thumbnail", {"uid": uid})
         return response.json()["thumbnail"]
 
-    def upload(self, file_path, filename=""):
+    def upload(self, file_path: str, filename: str="") -> Any:
         """Upload file `file_path`."""
         with open(file_path, "rb") as ul_body:
             response = self._post_data(
@@ -79,16 +80,16 @@ class Service:
             raise Exception("Failed to upload {}: {}".format(file_path, response.text))
         return response.json()["link"]
 
-    def shorten_url(self, url):
+    def shorten_url(self, url: str) -> Any:
         """Shorten `url`."""
         return self._post_data("upload", {"url": url}).json()["link"]
 
-    def delete(self, uid):
+    def delete(self, uid: str) -> None:
         """Delete uploaded item `uid`."""
         if self._post_data("delete", {"uid": uid}).status_code != 200:
             print("Failed to remove uid: " + uid)
 
-    def edit_settings(self, settings_dict):
+    def edit_settings(self, settings_dict: Any) -> None:
         """Edit load.link settings.
         """
         password = getpass("What is your password? ")
@@ -100,7 +101,7 @@ class Service:
         if response.status_code != 200:
             print("Failed to update settings: " + response.json()["message"])
 
-    def release_token(self, token_path=expanduser("~/.ll_token")):
+    def release_token(self, token_path: str=expanduser("~/.ll_token")) -> None:
         """Release token at `token_path` and remove it.
         """
         if not token_path or not isfile(token_path):
@@ -113,7 +114,7 @@ class Service:
 
         print("Failed to release token")
 
-    def release_all_tokens(self, token_path=expanduser("~/.ll_token")):
+    def release_all_tokens(self, token_path: str=expanduser("~/.ll_token")) -> None:
         """Release all authentication tokens and delete `token_path`.
         """
         if not token_path or not isfile(token_path):
@@ -126,11 +127,11 @@ class Service:
 
         print("Failed to release all tokens")
 
-    def prune_unused(self):
+    def prune_unused(self) -> Any:
         """Prune unused links."""
         return self._post_data("prune_unused").json()["pruned"]
 
-    def _post_data(self, action, json_dict=None, data_tuple=None):
+    def _post_data(self, action: str, json_dict: Any=None, data_tuple: Any=None) -> requests.Response:
         """Generic function handling all POSTs to /api endpoint.
         """
         payload = {"action": action}
@@ -141,7 +142,7 @@ class Service:
         if "username" not in payload:
             payload["token"] = self._get_token()
 
-        payload = {
+        fields = {
             "headers": (
                 "headers",
                 bytes(json.dumps(payload), "utf-8"),
@@ -150,9 +151,9 @@ class Service:
         }
 
         if data_tuple:
-            payload["data"] = data_tuple
+            fields["data"] = data_tuple
 
-        enc = MultipartEncoder(payload)
+        enc = MultipartEncoder(fields)
         me_monitor = MultipartEncoderMonitor(enc, _prog_cb(enc))
 
         response = requests.post(
@@ -172,7 +173,7 @@ class Service:
 
         return response
 
-    def _get_token(self, token_path=expanduser("~/.ll_token")):
+    def _get_token(self, token_path: str=expanduser("~/.ll_token")) -> str:
         """Check token_path for token if it exists
         or retrieve token from user input.
         """
@@ -197,10 +198,10 @@ class Service:
         return token
 
 
-def _prog_cb(encoder):
+def _prog_cb(encoder: MultipartEncoder) -> Callable[[MultipartEncoderMonitor], None]:
     progress_bar = ProgressBar(expected_size=encoder.len, filled_char="=")
 
-    def callback(mon):  # pylint: disable=missing-docstring
+    def callback(mon: MultipartEncoderMonitor) -> None:  # pylint: disable=missing-docstring
         progress_bar.show(mon.bytes_read)
 
     return callback

@@ -7,12 +7,13 @@ import struct
 import subprocess
 import tempfile
 from time import sleep
+from typing import List, Optional
 import wave
 
-from wand.image import Image
-import numpy
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
+from wand.image import Image # type: ignore
+import numpy # type: ignore
+from watchdog.observers import Observer # type: ignore
+from watchdog.events import FileSystemEvent, PatternMatchingEventHandler # type: ignore
 
 from .service import Service
 
@@ -31,14 +32,14 @@ PATTERNS = [
 ]
 
 
-class _UploadHandler(PatternMatchingEventHandler):
+class _UploadHandler(PatternMatchingEventHandler): # type: ignore
     def __init__(
         self,
-        args,
-        patterns,
-        ignore_patterns=None,
-        case_sensitive=False,
-        ignore_directories=True,
+        args: argparse.Namespace,
+        patterns: str,
+        ignore_patterns: Optional[str]=None,
+        case_sensitive: bool=False,
+        ignore_directories: bool=True,
     ):
         super(_UploadHandler, self).__init__(
             patterns=patterns,
@@ -51,8 +52,8 @@ class _UploadHandler(PatternMatchingEventHandler):
         self.base_dir = args.base_dir
         self.compress = args.compress
         self.volume = args.volume
-        self.sound = None
-        self.new_wav = None
+        self.sound: Optional[str] = None
+        self.new_wav: Optional[str] = None
 
         self._init_sound()
         if isdir(args.base_dir):
@@ -63,16 +64,16 @@ class _UploadHandler(PatternMatchingEventHandler):
             except os.error:  # may arise from races outside of the script
                 pass
 
-    def on_created(self, event):
+    def on_created(self, event: FileSystemEvent) -> None:
         sleep(1)  # Assume file takes at most 1s to finish writing
         self._upload_file(event.src_path)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Remove temporary files."""
         if self.new_wav:
             os.remove(self.new_wav)
 
-    def _upload_file(self, path):
+    def _upload_file(self, path: str) -> None:
         ul_fn = path
 
         _, ext = splitext(path)
@@ -92,7 +93,7 @@ class _UploadHandler(PatternMatchingEventHandler):
         if self.sound:
             subprocess.Popen("aplay -q " + self.sound, shell=True)
 
-    def _init_sound(self):
+    def _init_sound(self) -> None:
         wav_loc = expanduser("~/.config/llclient/completed.wav")
         if not isfile(wav_loc):
             print(
@@ -123,13 +124,13 @@ class _UploadHandler(PatternMatchingEventHandler):
         self.new_wav = new_wave_filename
         self.sound = new_wave_filename
 
-    def _reprocess(self):
+    def _reprocess(self) -> None:
         for pattern in PATTERNS:
             for file_path in glob.glob(os.path.join(self.base_dir, pattern)):
                 self._upload_file(file_path)
 
 
-def main():  # pylint: disable=missing-docstring
+def main() -> None:  # pylint: disable=missing-docstring
     args = _parse_args()
     handler = _UploadHandler(args, patterns=";".join(PATTERNS))
     observer = Observer()
@@ -146,7 +147,7 @@ def main():  # pylint: disable=missing-docstring
         raise
 
 
-def _parse_args():
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Upload all files in dir to " "load_link server."
     )
