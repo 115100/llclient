@@ -79,7 +79,7 @@ class _UploadHandler(PatternMatchingEventHandler): # type: ignore
         if ext == ".png":
             _, tmp_fn = tempfile.mkstemp()
             with Image(filename=path) as img:
-                img.compression_quality = 9
+                img.compression_quality = 75
                 img.save(filename=tmp_fn)
             ul_fn = tmp_fn
             os.remove(path)
