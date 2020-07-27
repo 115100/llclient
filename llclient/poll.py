@@ -10,10 +10,10 @@ from time import sleep
 from typing import List, Optional
 import wave
 
-from wand.image import Image # type: ignore
-import numpy # type: ignore
-from watchdog.observers import Observer # type: ignore
-from watchdog.events import FileSystemEvent, PatternMatchingEventHandler # type: ignore
+from wand.image import Image  # type: ignore
+import numpy  # type: ignore
+from watchdog.observers import Observer  # type: ignore
+from watchdog.events import FileSystemEvent, PatternMatchingEventHandler  # type: ignore
 
 from .service import Service
 
@@ -32,14 +32,14 @@ PATTERNS = [
 ]
 
 
-class _UploadHandler(PatternMatchingEventHandler): # type: ignore
+class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
     def __init__(
         self,
         args: argparse.Namespace,
         patterns: str,
-        ignore_patterns: Optional[str]=None,
-        case_sensitive: bool=False,
-        ignore_directories: bool=True,
+        ignore_patterns: Optional[str] = None,
+        case_sensitive: bool = False,
+        ignore_directories: bool = True,
     ):
         super(_UploadHandler, self).__init__(
             patterns=patterns,
