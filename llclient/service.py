@@ -3,7 +3,6 @@
 from getpass import getpass
 import json
 import os
-from os.path import dirname, expanduser, isfile
 import re
 from typing import Any, Callable, Optional
 
@@ -23,11 +22,11 @@ class Service:
         """Attempt to open config file and read values
         needed to access load.link.
         """
-        config_file = config_file or expanduser("~/.config/llclient/config")
+        config_file = config_file or os.path.expanduser("~/.config/llclient/config")
         try:
             cfg = open(config_file, "r+")
         except (OSError, IOError):
-            os.makedirs(dirname(config_file))
+            os.makedirs(os.path.dirname(config_file))
             cfg = open(config_file, "w+")
 
         self._config = yaml.safe_load(cfg)
@@ -101,10 +100,10 @@ class Service:
         if response.status_code != 200:
             print("Failed to update settings: " + response.json()["message"])
 
-    def release_token(self, token_path: str=expanduser("~/.ll_token")) -> None:
+    def release_token(self, token_path: str=os.path.expanduser("~/.ll_token")) -> None:
         """Release token at `token_path` and remove it.
         """
-        if not token_path or not isfile(token_path):
+        if not token_path or not os.path.isfile(token_path):
             print(token_path + " doesn't exist to release")
             return
 
@@ -114,10 +113,10 @@ class Service:
 
         print("Failed to release token")
 
-    def release_all_tokens(self, token_path: str=expanduser("~/.ll_token")) -> None:
+    def release_all_tokens(self, token_path: str=os.path.expanduser("~/.ll_token")) -> None:
         """Release all authentication tokens and delete `token_path`.
         """
-        if not token_path or not isfile(token_path):
+        if not token_path or not os.path.isfile(token_path):
             print(token_path + " doesn't exist to release")
             return
 
@@ -173,11 +172,11 @@ class Service:
 
         return response
 
-    def _get_token(self, token_path: str=expanduser("~/.ll_token")) -> str:
+    def _get_token(self, token_path: str=os.path.expanduser("~/.ll_token")) -> str:
         """Check token_path for token if it exists
         or retrieve token from user input.
         """
-        if isfile(token_path):
+        if os.path.isfile(token_path):
             with open(token_path, "r") as tok:
                 token = tok.readline()
                 if token:

@@ -1,7 +1,6 @@
 """Logic for polling and uploading files to load link."""
 import argparse
 import glob
-from os.path import basename, expanduser, isdir, isfile, splitext
 import os
 import struct
 import subprocess
@@ -55,7 +54,7 @@ class _UploadHandler(PatternMatchingEventHandler): # type: ignore
         self.new_wav: Optional[str] = None
 
         self._init_sound()
-        if isdir(args.base_dir):
+        if os.path.isdir(args.base_dir):
             self._reprocess()
         else:
             try:
@@ -75,7 +74,7 @@ class _UploadHandler(PatternMatchingEventHandler): # type: ignore
     def _upload_file(self, path: str) -> None:
         ul_fn = path
 
-        _, ext = splitext(path)
+        _, ext = os.path.splitext(path)
         if ext == ".png":
             _, tmp_fn = tempfile.mkstemp()
             with Image(filename=path) as img:
@@ -84,7 +83,7 @@ class _UploadHandler(PatternMatchingEventHandler): # type: ignore
             ul_fn = tmp_fn
             os.remove(path)
 
-        link = self.service.upload(ul_fn, basename(path))
+        link = self.service.upload(ul_fn, os.path.basename(path))
         os.remove(ul_fn)
 
         print("\nUploaded {} to {}".format(path, link))
@@ -93,8 +92,8 @@ class _UploadHandler(PatternMatchingEventHandler): # type: ignore
             subprocess.Popen("aplay -q " + self.sound, shell=True)
 
     def _init_sound(self) -> None:
-        wav_loc = expanduser("~/.config/llclient/completed.wav")
-        if not isfile(wav_loc):
+        wav_loc = os.path.expanduser("~/.config/llclient/completed.wav")
+        if not os.path.isfile(wav_loc):
             print(
                 "No completed.wav found. "
                 "If you'd like to play a sound on upload, "
