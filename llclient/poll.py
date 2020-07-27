@@ -124,25 +124,30 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
             return
 
         self.sound = wav_loc
-        if self.volume == 100:
+        # Raising volume is a no-op as we don't handle overflow.
+        if self.volume >= 100:
             return
 
-        old_wave = wave.open(wav_loc, "rb")
-        params = old_wave.getparams()
-        sound = old_wave.readframes(params.nframes)
-        old_wave.close()
+        with wave.open(wav_loc, "rb") as wav:
+            # FIXME: Volume changing only works on 16-bit/sample wav.
+            if wav.getsampwidth() != 2:
+                return
 
-        sound = numpy.fromstring(sound, numpy.int16) * (self.volume / 100)
-        sound = struct.pack("h" * len(sound), *sound.astype(int))
+            f, new_wave_filename = tempfile.mkstemp()
+            os.close(f)
+            with wave.open(new_wave_filename, "wb") as new_wave:
+                new_wave.setparams(wav.getparams())
 
-        _, new_wave_filename = tempfile.mkstemp()
-        new_wave = wave.open(new_wave_filename, "wb")
-        new_wave.setparams(params)
-        new_wave.writeframes(sound)
-        new_wave.close()
+                for frame in range(wav.getnframes()):
+                    frame = numpy.fromstring(wav.readframes(1), numpy.int16) * (
+                        self.volume / 100
+                    )
+                    new_wave.writeframes(
+                        struct.pack("<" + "h" * len(frame), *frame.astype(numpy.int16))
+                    )
 
-        self.new_wav = new_wave_filename
-        self.sound = new_wave_filename
+            self.new_wav = new_wave_filename
+            self.sound = new_wave_filename
 
     def _reprocess(self) -> None:
         for pattern in PATTERNS:
