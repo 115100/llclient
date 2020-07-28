@@ -84,12 +84,13 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
                     continue
 
                 try:
-                    with os.scandir(os.path.join(entry.path, "fd")) as fds:
-                        for fd in fds:
-                            if os.path.realpath(fd.path) == path:
-                                return True
+                    fds = os.scandir(os.path.join(entry.path, "fd"))
                 except (FileNotFoundError, PermissionError):
-                    pass
+                    continue
+                for fd in fds:
+                    if os.path.realpath(fd.path) == path:
+                        fds.close()
+                        return True
 
         return False
 
