@@ -11,7 +11,7 @@ from typing import List, Optional
 import wave
 
 from wand.image import Image  # type: ignore
-import numpy  # type: ignore
+import numpy as np  # type: ignore
 from watchdog.observers import Observer  # type: ignore
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler  # type: ignore
 
@@ -139,12 +139,12 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
             with wave.open(new_wave_filename, "wb") as new_wave:
                 new_wave.setparams(wav.getparams())
 
-                for frame in range(wav.getnframes()):
-                    frame = numpy.fromstring(wav.readframes(1), numpy.int16) * (
-                        self.volume / 100
+                for _ in range(wav.getnframes()):
+                    frame = (
+                        np.fromstring(wav.readframes(1), np.int16) * self.volume / 100
                     )
                     new_wave.writeframes(
-                        struct.pack("<" + "h" * len(frame), *frame.astype(numpy.int16))
+                        struct.pack("<" + "h" * frame.size, *frame.astype(np.int16))
                     )
 
             self.new_wav = new_wave_filename
@@ -164,13 +164,12 @@ def main() -> None:  # pylint: disable=missing-docstring
     observer.start()
 
     try:
-        while True:
-            sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
         observer.join()
+    finally:
+        if observer.is_alive():
+            observer.stop()
+            observer.join()
         handler.cleanup()
-        raise
 
 
 def _parse_args() -> argparse.Namespace:

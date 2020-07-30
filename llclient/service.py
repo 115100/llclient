@@ -6,8 +6,8 @@ import os
 import re
 from typing import Any, Callable, Optional
 
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor # type: ignore
-from clint.textui.progress import Bar as ProgressBar # type: ignore
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor  # type: ignore
+from clint.textui.progress import Bar as ProgressBar  # type: ignore
 import requests
 import yaml
 
@@ -15,10 +15,10 @@ import yaml
 class Service:
     """Utility for quick requests to load.link"""
 
-    def __init__(self, config_file: Optional[str]=None) -> None:
+    def __init__(self, config_file: Optional[str] = None) -> None:
         self._config_reader(config_file)
 
-    def _config_reader(self, config_file: Optional[str]=None) -> None:
+    def _config_reader(self, config_file: Optional[str] = None) -> None:
         """Attempt to open config file and read values
         needed to access load.link.
         """
@@ -68,7 +68,7 @@ class Service:
         response = self._post_data("get_thumbnail", {"uid": uid})
         return response.json()["thumbnail"]
 
-    def upload(self, file_path: str, filename: str="") -> Any:
+    def upload(self, file_path: str, filename: str = "") -> Any:
         """Upload file `file_path`."""
         with open(file_path, "rb") as ul_body:
             response = self._post_data(
@@ -100,7 +100,9 @@ class Service:
         if response.status_code != 200:
             print("Failed to update settings: " + response.json()["message"])
 
-    def release_token(self, token_path: str=os.path.expanduser("~/.ll_token")) -> None:
+    def release_token(
+        self, token_path: str = os.path.expanduser("~/.ll_token")
+    ) -> None:
         """Release token at `token_path` and remove it.
         """
         if not token_path or not os.path.isfile(token_path):
@@ -113,7 +115,9 @@ class Service:
 
         print("Failed to release token")
 
-    def release_all_tokens(self, token_path: str=os.path.expanduser("~/.ll_token")) -> None:
+    def release_all_tokens(
+        self, token_path: str = os.path.expanduser("~/.ll_token")
+    ) -> None:
         """Release all authentication tokens and delete `token_path`.
         """
         if not token_path or not os.path.isfile(token_path):
@@ -130,7 +134,9 @@ class Service:
         """Prune unused links."""
         return self._post_data("prune_unused").json()["pruned"]
 
-    def _post_data(self, action: str, json_dict: Any=None, data_tuple: Any=None) -> requests.Response:
+    def _post_data(
+        self, action: str, json_dict: Any = None, data_tuple: Any = None
+    ) -> requests.Response:
         """Generic function handling all POSTs to /api endpoint.
         """
         payload = {"action": action}
@@ -172,7 +178,7 @@ class Service:
 
         return response
 
-    def _get_token(self, token_path: str=os.path.expanduser("~/.ll_token")) -> str:
+    def _get_token(self, token_path: str = os.path.expanduser("~/.ll_token")) -> str:
         """Check token_path for token if it exists
         or retrieve token from user input.
         """
@@ -200,7 +206,9 @@ class Service:
 def _prog_cb(encoder: MultipartEncoder) -> Callable[[MultipartEncoderMonitor], None]:
     progress_bar = ProgressBar(expected_size=encoder.len, filled_char="=")
 
-    def callback(mon: MultipartEncoderMonitor) -> None:  # pylint: disable=missing-docstring
+    def callback(
+        mon: MultipartEncoderMonitor,
+    ) -> None:  # pylint: disable=missing-docstring
         progress_bar.show(mon.bytes_read)
 
     return callback
