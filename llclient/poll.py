@@ -11,7 +11,6 @@ from typing import List, Optional
 import wave
 
 from wand.image import Image  # type: ignore
-import numpy as np  # type: ignore
 from watchdog.observers import Observer  # type: ignore
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler  # type: ignore
 
@@ -134,17 +133,22 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
             if wav.getsampwidth() != 2:
                 return
 
-            f, new_wave_filename = tempfile.mkstemp()
-            os.close(f)
+            fd, new_wave_filename = tempfile.mkstemp(suffix=".wav")
+            os.close(fd)
             with wave.open(new_wave_filename, "wb") as new_wave:
                 new_wave.setparams(wav.getparams())
 
                 for _ in range(wav.getnframes()):
-                    frame = (
-                        np.fromstring(wav.readframes(1), np.int16) * self.volume / 100
-                    )
+                    frame_format = "<" + "h" * wav.getnchannels()
+
                     new_wave.writeframes(
-                        struct.pack("<" + "h" * frame.size, *frame.astype(np.int16))
+                        struct.pack(
+                            frame_format,
+                            *[
+                                round(sample * self.volume / 100)
+                                for sample in struct.unpack(frame_format, wav.readframes(1))
+                            ]
+                        )
                     )
 
             self.new_wav = new_wave_filename

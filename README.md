@@ -15,7 +15,6 @@ OS applications/libraries
 
 Python 3.4+
 
-- numpy
 - pyyaml
 - requests
 - requests-toolbelt
@@ -29,5 +28,5 @@ apt-get install imagemagick
 ```
 
 ```
-pip3 install numpy pyyaml requests requests-toolbelt watchdog wand
+pip3 install pyyaml requests requests-toolbelt watchdog wand
 ```
