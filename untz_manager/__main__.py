@@ -3,39 +3,48 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import os
 
-from .encoder import apply_gain, encode_file
-from .utils import get_args, preflight_checks, recursive_file_search
+from .encoder import OpusEncoder, VorbisEncoder
+from .utils import get_args, recursive_file_search
 
-ARGS = get_args()
 LOGGER = logging.getLogger(__name__)
 
 
-def _encode_on_filter(file_entry):
-    if file_entry.lower().endswith('.flac'):
-        LOGGER.info('Encoding "%s".', file_entry)
-        encode_file(file_entry,
-                    ARGS.base_dir.rstrip('/'),
-                    ARGS.pattern,
-                    ARGS.quality,
-                    ARGS.ogg_cli_parameters)
+def _encode_flac(encoder):
+    def _encoder(file_entry):
+        if file_entry.lower().endswith(".flac"):
+            LOGGER.info('Encoding "%s".', file_entry)
+            encoder.encode_file(file_entry)
+
+    return _encoder
 
 
 def main():
     """Main logic for untz."""
+    ARGS = get_args()
     if ARGS.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    preflight_checks()
+    if ARGS.encoder == "opus":
+        encoder = OpusEncoder(ARGS.base_dir, ARGS.pattern, ARGS.quality)
+    elif ARGS.encoder == "vorbis":
+        encoder = VorbisEncoder(ARGS.base_dir, ARGS.pattern, ARGS.bitrate)
+    else:
+        raise ValueError("invalid encoder: {}".format(ARGS.encoder))
 
-    LOGGER.info('Starting %d threads.', ARGS.threads)
+    flac_encoder = _encode_flac(encoder)
+
+    LOGGER.info("Starting %d threads.", ARGS.threads)
     with ThreadPoolExecutor(max_workers=ARGS.threads) as tpe:
+        futures = []
         for i in ARGS.inputs:
             if os.path.isdir(i):
-                tpe.map(_encode_on_filter, recursive_file_search(i))
+                for fe in recursive_file_search(i):
+                    futures.append(tpe.submit(flac_encoder, fe))
             else:
-                tpe.submit(_encode_on_filter, i)
+                futures.append(tpe.submit(flac_encoder, i))
+        for future in futures:
+            future.result()
 
     if ARGS.replaygain:
-        apply_gain(ARGS.base_dir)
-
-    LOGGER.info('Program exiting now.')
+        encoder.apply_gain()
+    LOGGER.info("Program exiting now.")
