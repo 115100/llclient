@@ -12,15 +12,11 @@ root/
 
 ## Setup instructions
 
-I have only run this in a Linux environment under Python 3.5.1.
+This requires [Taglib](http://taglib.github.io/) and [Flac](https://xiph.org/flac/).
 
-This requires [Taglib](http://taglib.github.io/), [Oggenc2](http://www.rarewares.org/ogg-oggenc.php) and [Flac](https://xiph.org/flac/).
+Opus encoding requires [opus-tools](https://opus-codec.org/downloads/) and [r128gain](https://github.com/desbma/r128gain).
 
-In Debian/Ubuntu, this requires a simple
-
-```bash
-apt-get install flac libtag1-dev vorbis-tools
-```
+Vorbis encoding requires [Oggenc2](http://www.rarewares.org/ogg-oggenc.php).
 
 Afterwards, install this package with
 
