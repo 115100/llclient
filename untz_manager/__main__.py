@@ -25,9 +25,9 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
 
     if ARGS.encoder == "opus":
-        encoder = OpusEncoder(ARGS.base_dir, ARGS.pattern, ARGS.quality)
+        encoder = OpusEncoder(ARGS.base_dir, ARGS.pattern, ARGS.bitrate)
     elif ARGS.encoder == "vorbis":
-        encoder = VorbisEncoder(ARGS.base_dir, ARGS.pattern, ARGS.bitrate)
+        encoder = VorbisEncoder(ARGS.base_dir, ARGS.pattern, ARGS.quality)
     else:
         raise ValueError("invalid encoder: {}".format(ARGS.encoder))
 
