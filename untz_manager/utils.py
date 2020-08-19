@@ -51,8 +51,8 @@ def get_args():
         "--bitrate",
         dest="bitrate",
         type=int,
-        default=10,
-        help="Sets target bitrate. Only valid for Opus encoder.",
+        default=192,
+        help="Sets target bitrate in kbps. Only valid for Opus encoder. Defaults to 192.",
     )
     parser.add_argument(
         "-r",
