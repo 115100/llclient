@@ -3,11 +3,12 @@ import argparse
 from multiprocessing import cpu_count
 import os
 import shutil
+from typing import Iterable
 
 from . import __version__
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     """Parse and return arguments."""
     parser = argparse.ArgumentParser(
         description="Convert FLACs and sort into a sensible folder hierarchy."
@@ -88,7 +89,7 @@ def get_args():
     return parser.parse_args()
 
 
-def recursive_file_search(entry):
+def recursive_file_search(entry: str) -> Iterable[str]:
     """Recursively yield paths of all files in `entry`.
 
     Args:

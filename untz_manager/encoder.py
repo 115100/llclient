@@ -6,18 +6,20 @@ import signal
 import subprocess
 import sys
 import threading
+from typing import List, Mapping
 
-import taglib
+import taglib  # type: ignore
 
 
 class Encoder:
-    def __init__(self, pattern, ext):
+    def __init__(self, base_dir: str, pattern: List[str], ext: str):
         self.lock = threading.Condition()
         self.logger = logging.getLogger("encoder")
+        self.base_dir = base_dir
         self.pattern = pattern
         self.ext = ext
 
-    def _get_vorbis_comments(self, audio_file):
+    def _get_vorbis_comments(self, audio_file: str) -> Mapping[str, str]:
         macros = (
             ("%g", "GENRE"),
             ("%n", "TRACKNUMBER"),
@@ -49,7 +51,7 @@ class Encoder:
 
         return oggenc_macros
 
-    def encode_file(self, audio_file):
+    def encode_file(self, audio_file: str) -> None:
         """Encode a given audio file, storing in a logical manner.
 
         Args:
@@ -74,21 +76,21 @@ class Encoder:
 
         self._run_encoder(audio_file, output_filename)
 
-    def _run_encoder(self, audio_file, output_filename):
+    def _run_encoder(self, audio_file: str, output_filename: str) -> None:
         raise NotImplementedError
 
-    def apply_gain(self):
+    def apply_gain(self) -> None:
         """Run gain tagging on base_dir."""
         raise NotImplementedError
 
 
 class OpusEncoder(Encoder):
-    def __init__(self, base_dir, pattern, bitrate):
+    def __init__(self, base_dir: str, pattern: List[str], bitrate: int):
         self.base_dir = base_dir.rstrip("/")
         self.bitrate = bitrate
-        super().__init__(pattern=pattern, ext="opus")
+        super().__init__(base_dir=base_dir, pattern=pattern, ext="opus")
 
-    def _run_encoder(self, audio_file, output_filename):
+    def _run_encoder(self, audio_file: str, output_filename: str) -> None:
         process_args = [
             "opusenc",
             "--bitrate",
@@ -99,26 +101,26 @@ class OpusEncoder(Encoder):
         self.logger.debug('Running "%s".', " ".join(process_args))
         subprocess.run(process_args, capture_output=True, check=True)
 
-    def apply_gain(self):
+    def apply_gain(self) -> None:
         subprocess.run(
             ["r128gain", "-aors", self.base_dir], capture_output=True, check=True
         )
 
 
 class VorbisEncoder(Encoder):
-    def __init__(self, base_dir, pattern, quality):
+    def __init__(self, base_dir: str, pattern: List[str], quality: float):
         self.base_dir = base_dir.rstrip("/")
         self.quality = quality
-        super().__init__(pattern=pattern, ext="ogg")
+        super().__init__(base_dir=base_dir, pattern=pattern, ext="ogg")
 
-    def _run_encoder(self, audio_file, output_filename):
+    def _run_encoder(self, audio_file: str, output_filename: str) -> None:
         process_args = ["oggenc", "-q", str(self.quality), "-o", output_filename]
         process_args.append(audio_file)
 
         self.logger.debug('Running "%s".', " ".join(process_args))
         subprocess.run(process_args, capture_output=True, check=True)
 
-    def apply_gain(self):
+    def apply_gain(self) -> None:
         subprocess.run(
             ["vorbisgain", "-afrs", self.base_dir], capture_output=True, check=True
         )

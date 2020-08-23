@@ -1,7 +1,5 @@
 """Install untz manager.
 
-Developed on Python 3.5.1.
-
 Usage:
     python setup.py install
 """
