@@ -12,9 +12,11 @@ root/
 
 ## Setup instructions
 
-This requires [Taglib](http://taglib.github.io/) and [Flac](https://xiph.org/flac/).
+This requires
+- [Taglib](http://taglib.github.io/)
+- [loudgain/rgbpm](https://github.com/Moonbase59/loudgain)
 
-Opus encoding requires [opus-tools](https://opus-codec.org/downloads/) and [r128gain](https://github.com/desbma/r128gain).
+Opus encoding requires [opus-tools](https://opus-codec.org/downloads/).
 
 Vorbis encoding requires [Oggenc2](http://www.rarewares.org/ogg-oggenc.php).
 

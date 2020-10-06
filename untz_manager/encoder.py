@@ -81,7 +81,9 @@ class Encoder:
 
     def apply_gain(self) -> None:
         """Run gain tagging on base_dir."""
-        raise NotImplementedError
+        subprocess.run(
+            ["rgbpm", "-b", self.base_dir], capture_output=True, check=True
+        )
 
 
 class OpusEncoder(Encoder):
@@ -101,11 +103,6 @@ class OpusEncoder(Encoder):
         self.logger.debug('Running "%s".', " ".join(process_args))
         subprocess.run(process_args, capture_output=True, check=True)
 
-    def apply_gain(self) -> None:
-        subprocess.run(
-            ["r128gain", "-aors", self.base_dir], capture_output=True, check=True
-        )
-
 
 class VorbisEncoder(Encoder):
     def __init__(self, base_dir: str, pattern: List[str], quality: float):
@@ -119,8 +116,3 @@ class VorbisEncoder(Encoder):
 
         self.logger.debug('Running "%s".', " ".join(process_args))
         subprocess.run(process_args, capture_output=True, check=True)
-
-    def apply_gain(self) -> None:
-        subprocess.run(
-            ["vorbisgain", "-afrs", self.base_dir], capture_output=True, check=True
-        )
