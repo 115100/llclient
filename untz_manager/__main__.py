@@ -4,7 +4,7 @@ import logging
 import os
 from typing import Callable
 
-from .encoder import OpusEncoder, VorbisEncoder
+from .encoder import Encoder, OpusEncoder, VorbisEncoder
 from .utils import get_args, recursive_file_search
 
 LOGGER = logging.getLogger(__name__)
