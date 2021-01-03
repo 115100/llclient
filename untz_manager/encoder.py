@@ -15,7 +15,8 @@ class Encoder:
     def __init__(self, base_dir: str, pattern: List[str], ext: str):
         self.lock = threading.Condition()
         self.logger = logging.getLogger("encoder")
-        self.base_dir = base_dir
+        self.base_dir = base_dir.rstrip("/")
+        self.output_dirs = set()
         self.pattern = pattern
         self.ext = ext
 
@@ -67,6 +68,7 @@ class Encoder:
             output_filename = output_filename.replace(
                 macro, re.sub(r"[\"*/:<>?\\|]", "_", value)
             )
+        self.output_dirs.add(os.path.dirname(output_filename))
 
         with self.lock:
             target_path = os.path.dirname(output_filename)
@@ -81,14 +83,14 @@ class Encoder:
 
     def apply_gain(self) -> None:
         """Run gain tagging on base_dir."""
-        subprocess.run(
-            ["rgbpm", "-b", self.base_dir], capture_output=True, check=True
-        )
+        for output_dir in self.output_dirs:
+            subprocess.run(
+                ["rgbpm", "-b", output_dir], capture_output=True, check=True
+            )
 
 
 class OpusEncoder(Encoder):
     def __init__(self, base_dir: str, pattern: List[str], bitrate: int):
-        self.base_dir = base_dir.rstrip("/")
         self.bitrate = bitrate
         super().__init__(base_dir=base_dir, pattern=pattern, ext="opus")
 
@@ -106,7 +108,6 @@ class OpusEncoder(Encoder):
 
 class VorbisEncoder(Encoder):
     def __init__(self, base_dir: str, pattern: List[str], quality: float):
-        self.base_dir = base_dir.rstrip("/")
         self.quality = quality
         super().__init__(base_dir=base_dir, pattern=pattern, ext="ogg")
 
