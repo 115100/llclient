@@ -35,8 +35,8 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
     def __init__(
         self,
         args: argparse.Namespace,
-        patterns: str,
-        ignore_patterns: Optional[str] = None,
+        patterns: List[str],
+        ignore_patterns: Optional[List[str]] = None,
         case_sensitive: bool = False,
         ignore_directories: bool = True,
     ):
@@ -162,7 +162,7 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
 
 def main() -> None:  # pylint: disable=missing-docstring
     args = _parse_args()
-    handler = _UploadHandler(args, patterns=";".join(PATTERNS))
+    handler = _UploadHandler(args, patterns=PATTERNS)
     observer = Observer()
     observer.schedule(handler, path=args.base_dir)
     observer.start()
