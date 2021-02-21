@@ -6,7 +6,7 @@ import signal
 import subprocess
 import sys
 import threading
-from typing import List, Mapping
+from typing import List, Mapping, Set
 
 import taglib  # type: ignore
 
@@ -16,7 +16,7 @@ class Encoder:
         self.lock = threading.Condition()
         self.logger = logging.getLogger("encoder")
         self.base_dir = base_dir.rstrip("/")
-        self.output_dirs = set()
+        self.output_dirs: Set[str] = set()
         self.pattern = pattern
         self.ext = ext
 
@@ -84,9 +84,9 @@ class Encoder:
     def apply_gain(self) -> None:
         """Run gain tagging on base_dir."""
         for output_dir in self.output_dirs:
-            subprocess.run(
-                ["rgbpm", "-b", output_dir], capture_output=True, check=True
-            )
+            process_args = ["rgbpm", "-b", output_dir]
+            self.logger.debug('Running "%s".', " ".join(process_args))
+            subprocess.run(process_args, capture_output=True, check=True)
 
 
 class OpusEncoder(Encoder):
