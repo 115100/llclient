@@ -6,17 +6,9 @@ from typing import Callable
 
 from .encoder import Encoder, OpusEncoder, VorbisEncoder
 from .utils import get_args, recursive_file_search
+from .collection import Collection, Cue, Directory, Singlet
 
 LOGGER = logging.getLogger(__name__)
-
-
-def _encode_flac(encoder: Encoder) -> Callable[[str], None]:
-    def _encoder(file_entry: str) -> None:
-        if file_entry.lower().endswith(".flac"):
-            LOGGER.info('Encoding "%s".', file_entry)
-            encoder.encode_file(file_entry)
-
-    return _encoder
 
 
 def main() -> None:
@@ -34,20 +26,21 @@ def main() -> None:
     else:
         raise ValueError("invalid encoder: {}".format(ARGS.encoder))
 
-    flac_encoder = _encode_flac(encoder)
-
     LOGGER.info("Starting %d threads.", ARGS.threads)
     with ThreadPoolExecutor(max_workers=ARGS.threads) as tpe:
         futures = []
-        for i in ARGS.inputs:
-            if os.path.isdir(i):
-                for fe in recursive_file_search(i):
-                    futures.append(tpe.submit(flac_encoder, fe))
+        for i, path in enumerate(ARGS.inputs):
+            if ".cue" in path:
+                collection = Cue(path)  # type: Collection
+            elif os.path.isdir(path):
+                collection = Directory(path)
             else:
-                futures.append(tpe.submit(flac_encoder, i))
+                collection = Singlet(path)
+
+            for entry in collection:
+                futures.append(tpe.submit(encoder.encode_file, entry))
         for future in futures:
             future.result()
 
     if ARGS.replaygain:
         encoder.apply_gain()
-    LOGGER.info("Program exiting now.")
