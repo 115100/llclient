@@ -1,1 +1,1 @@
-pytaglib
+pytaglib==1.4.6
