@@ -10,9 +10,9 @@ from time import sleep
 from typing import List, Optional
 import wave
 
-from wand.image import Image  # type: ignore
-from watchdog.observers import Observer  # type: ignore
-from watchdog.events import FileSystemEvent, PatternMatchingEventHandler  # type: ignore
+from wand.image import Image
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 
 from .service import Service
 
@@ -31,7 +31,7 @@ PATTERNS = [
 ]
 
 
-class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
+class _UploadHandler(PatternMatchingEventHandler):
     def __init__(
         self,
         args: argparse.Namespace,
@@ -146,7 +146,9 @@ class _UploadHandler(PatternMatchingEventHandler):  # type: ignore
                             frame_format,
                             *[
                                 round(sample * self.volume / 100)
-                                for sample in struct.unpack(frame_format, wav.readframes(1))
+                                for sample in struct.unpack(
+                                    frame_format, wav.readframes(1)
+                                )
                             ]
                         )
                     )

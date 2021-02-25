@@ -4,10 +4,19 @@ from getpass import getpass
 import json
 import os
 import re
-from typing import Any, Callable, Optional
+from typing import (
+    cast,
+    BinaryIO,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor  # type: ignore
-from clint.textui.progress import Bar as ProgressBar  # type: ignore
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from clint.textui.progress import Bar as ProgressBar
 import requests
 import yaml
 
@@ -54,21 +63,28 @@ class Service:
         if not re.match(r"^https?://.*/|\?api$", self._root_url):
             raise Exception("Invalid URL passed")
 
-    def get_links(self, limit: str, offset: str) -> Any:
+    def get_links(self, limit: str, offset: str) -> List[Dict[str, str]]:
         """Get `limit` links starting from `offset`."""
-        response = self._post_data("get_links", {"limit": limit, "offset": offset})
-        return response.json()["links"]
+        response = cast(
+            Dict[str, List[Dict[str, str]]],
+            self._post_data("get_links", {"limit": limit, "offset": offset}).json(),
+        )
+        return response["links"]
 
-    def count(self) -> Any:
+    def count(self) -> int:
         """Return count of all uploaded items."""
-        return self._post_data("count").json()["count"]
+        resp = cast(Dict[str, int], self._post_data("count").json())
+        return resp["count"]
 
-    def get_thumbnail(self, uid: str) -> Any:
+    def get_thumbnail(self, uid: str) -> Dict[str, str]:
         """Return thumbnail and associated details for `uid`."""
-        response = self._post_data("get_thumbnail", {"uid": uid})
-        return response.json()["thumbnail"]
+        response = cast(
+            Dict[str, Dict[str, str]],
+            self._post_data("get_thumbnail", {"uid": uid}).json(),
+        )
+        return response["thumbnail"]
 
-    def upload(self, file_path: str, filename: str = "") -> Any:
+    def upload(self, file_path: str, filename: str = "") -> str:
         """Upload file `file_path`."""
         with open(file_path, "rb") as ul_body:
             response = self._post_data(
@@ -77,20 +93,21 @@ class Service:
 
         if response.status_code == 202:
             raise Exception("Failed to upload {}: {}".format(file_path, response.text))
-        return response.json()["link"]
+        j_response = cast(Dict[str, str], response.json())
+        return j_response["link"]
 
-    def shorten_url(self, url: str) -> Any:
+    def shorten_url(self, url: str) -> str:
         """Shorten `url`."""
-        return self._post_data("upload", {"url": url}).json()["link"]
+        response = cast(Dict[str, str], self._post_data("upload", {"url": url}).json())
+        return response["link"]
 
     def delete(self, uid: str) -> None:
         """Delete uploaded item `uid`."""
         if self._post_data("delete", {"uid": uid}).status_code != 200:
             print("Failed to remove uid: " + uid)
 
-    def edit_settings(self, settings_dict: Any) -> None:
-        """Edit load.link settings.
-        """
+    def edit_settings(self, settings_dict: Dict[str, str]) -> None:
+        """Edit load.link settings."""
         password = getpass("What is your password? ")
 
         response = self._post_data(
@@ -103,8 +120,7 @@ class Service:
     def release_token(
         self, token_path: str = os.path.expanduser("~/.ll_token")
     ) -> None:
-        """Release token at `token_path` and remove it.
-        """
+        """Release token at `token_path` and remove it."""
         if not token_path or not os.path.isfile(token_path):
             print(token_path + " doesn't exist to release")
             return
@@ -118,8 +134,7 @@ class Service:
     def release_all_tokens(
         self, token_path: str = os.path.expanduser("~/.ll_token")
     ) -> None:
-        """Release all authentication tokens and delete `token_path`.
-        """
+        """Release all authentication tokens and delete `token_path`."""
         if not token_path or not os.path.isfile(token_path):
             print(token_path + " doesn't exist to release")
             return
@@ -130,15 +145,18 @@ class Service:
 
         print("Failed to release all tokens")
 
-    def prune_unused(self) -> Any:
+    def prune_unused(self) -> int:
         """Prune unused links."""
-        return self._post_data("prune_unused").json()["pruned"]
+        response = cast(Dict[str, int], self._post_data("prune_unused").json())
+        return response["pruned"]
 
     def _post_data(
-        self, action: str, json_dict: Any = None, data_tuple: Any = None
+        self,
+        action: str,
+        json_dict: Optional[Dict[str, str]] = None,
+        data_tuple: Optional[Tuple[str, BinaryIO, str]] = None,
     ) -> requests.Response:
-        """Generic function handling all POSTs to /api endpoint.
-        """
+        """Generic function handling all POSTs to /api endpoint."""
         payload = {"action": action}
 
         if json_dict:
@@ -153,7 +171,7 @@ class Service:
                 bytes(json.dumps(payload), "utf-8"),
                 "application/json",
             )
-        }
+        }  # type: Dict[str, Tuple[str, Union[BinaryIO, bytes], str]]
 
         if data_tuple:
             fields["data"] = data_tuple
@@ -163,7 +181,7 @@ class Service:
 
         response = requests.post(
             self._root_url,
-            data=me_monitor,
+            data=me_monitor,  # type: ignore # uses hasttr magic: https://github.com/python/mypy/issues/142
             headers={"content-type": me_monitor.content_type},
         )
 
