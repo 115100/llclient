@@ -92,7 +92,7 @@ class Service:
             )
 
         if response.status_code == 202:
-            raise Exception("Failed to upload {}: {}".format(file_path, response.text))
+            raise Exception(f"Failed to upload {file_path}: {response.text}")
         j_response = cast(Dict[str, str], response.json())
         return j_response["link"]
 
@@ -189,9 +189,7 @@ class Service:
             response.raise_for_status()
         except:
             raise Exception(
-                "Error {error_code} with {action}: {error}".format(
-                    error_code=response.status_code, action=action, error=response.text
-                )
+                f"Error {response.status_code} with {action}: {response.text}"
             )
 
         return response

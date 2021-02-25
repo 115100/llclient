@@ -108,10 +108,10 @@ class _UploadHandler(PatternMatchingEventHandler):
         link = self.service.upload(ul_fn, os.path.basename(path))
         os.remove(ul_fn)
 
-        print("\nUploaded {} to {}".format(path, link))
-        subprocess.Popen("echo -n %s | xclip -selection clipboard" % link, shell=True)
+        print(f"\nUploaded {path} to {link}")
+        subprocess.Popen(f"echo -n {link} | xclip -selection clipboard", shell=True)
         if self.sound:
-            subprocess.Popen("aplay -q " + self.sound, shell=True)
+            subprocess.Popen(f"aplay -q {self.sound}", shell=True)
 
     def _init_sound(self) -> None:
         wav_loc = os.path.expanduser("~/.config/llclient/completed.wav")
@@ -149,7 +149,7 @@ class _UploadHandler(PatternMatchingEventHandler):
                                 for sample in struct.unpack(
                                     frame_format, wav.readframes(1)
                                 )
-                            ]
+                            ],
                         )
                     )
 

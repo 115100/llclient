@@ -13,7 +13,7 @@ OS applications/libraries
 - Imagemagick
 - xclip
 
-Python 3.4+
+Python 3.6+
 
 - pyyaml
 - requests
