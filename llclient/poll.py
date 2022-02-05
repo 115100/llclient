@@ -113,7 +113,7 @@ class _UploadHandler(PatternMatchingEventHandler):
         os.remove(ul_fn)
 
         print(f"\nUploaded {path} to {link}")
-        subprocess.Popen(f"echo -n {link} | xclip -selection clipboard", shell=True)
+        subprocess.Popen(f"echo -n {link} | wl-copy", shell=True)
         if self.sound:
             subprocess.Popen(f"aplay -q {self.sound}", shell=True)
 
