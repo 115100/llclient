@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llclient"
+version = "4.0.0"
+dependencies = [
+    "PyYAML",
+    "Wand",
+    "requests",
+    "requests-toolbelt",
+    "watchdog",
+]
+
+[project.scripts]
+llclient = "llclient.poll:main"
+
+[tool.setuptools]
+packages = ["llclient"]
