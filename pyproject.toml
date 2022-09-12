@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llclient"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
     "PyYAML",
     "Wand",
@@ -18,3 +18,8 @@ llclient = "llclient.poll:main"
 
 [tool.setuptools]
 packages = ["llclient"]
+
+[tool.mypy]
+mypy_path = "stubs"
+warn_return_any = true
+warn_unused_configs = true
