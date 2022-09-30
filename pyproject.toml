@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llclient"
-version = "4.0.1"
+version = "5.0.0"
 dependencies = [
     "PyYAML",
     "Wand",
