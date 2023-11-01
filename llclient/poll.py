@@ -90,7 +90,7 @@ class _UploadHandler(PatternMatchingEventHandler):
                 for fd in fds:
                     try:
                         real_path = os.path.realpath(fd.path)
-                    except FileNotFoundError:
+                    except (FileNotFoundError, PermissionError):
                         continue
                     if real_path == path:
                         fds.close()
