@@ -181,7 +181,7 @@ class Service:
 
         response = requests.post(
             self._root_url,
-            data=me_monitor,  # type: ignore # uses hasttr magic: https://github.com/python/mypy/issues/142
+            data=me_monitor,
             headers={"content-type": me_monitor.content_type},
         )
 
