@@ -24,3 +24,10 @@ packages = ["llclient"]
 mypy_path = "stubs"
 warn_return_any = true
 warn_unused_configs = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+    "types-pyyaml>=6.0.12.20241230",
+    "types-requests>=2.32.0.20241016",
+]
