@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "llclient"
 version = "5.0.1"
+requires-python = ">=3.9"
 dependencies = [
     "PyYAML",
     "Wand",
