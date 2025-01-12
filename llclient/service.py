@@ -1,5 +1,5 @@
-"""Set of functions for load.link (https://github.com/deuiore/load.link) API.
-"""
+"""Set of functions for load.link (https://github.com/deuiore/load.link) API."""
+
 from getpass import getpass
 import json
 import os
@@ -165,13 +165,13 @@ class Service:
         if "username" not in payload:
             payload["token"] = self._get_token()
 
-        fields = {
+        fields: Dict[str, Tuple[str, Union[BinaryIO, bytes], str]] = {
             "headers": (
                 "headers",
                 bytes(json.dumps(payload), "utf-8"),
                 "application/json",
             )
-        }  # type: Dict[str, Tuple[str, Union[BinaryIO, bytes], str]]
+        }
 
         if data_tuple:
             fields["data"] = data_tuple

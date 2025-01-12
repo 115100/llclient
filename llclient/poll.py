@@ -1,4 +1,5 @@
 """Logic for polling and uploading files to load link."""
+
 import argparse
 import glob
 import os
@@ -187,7 +188,7 @@ def main() -> None:  # pylint: disable=missing-docstring
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Upload all files in dir to " "load_link server."
+        description="Upload all files in dir to load_link server."
     )
     parser.add_argument(
         "-b",
