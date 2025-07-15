@@ -3,11 +3,9 @@
 import argparse
 import glob
 import os
-import random
 import struct
 import subprocess
 import tempfile
-from time import sleep
 from typing import List, Optional
 import wave
 
@@ -64,40 +62,13 @@ class _UploadHandler(PatternMatchingEventHandler):
             except os.error:  # may arise from races outside of the script
                 pass
 
-    def on_created(self, event: FileSystemEvent) -> None:
-        self._wait_closed(event.src_path)
+    def on_closed(self, event: FileSystemEvent) -> None:
         self._upload_file(event.src_path)
 
     def cleanup(self) -> None:
         """Remove temporary files."""
         if self.new_wav:
             os.remove(self.new_wav)
-
-    def _wait_closed(self, path: str) -> None:
-        while self._is_open(path):
-            sleep(random.uniform(0.1, 0.2))
-
-    def _is_open(self, path: str) -> bool:
-        with os.scandir("/proc") as proc:
-            for entry in proc:
-                # We only want to scan PIDs, i.e. /proc/[0-9]+.
-                if not entry.name.isdecimal():
-                    continue
-
-                try:
-                    fds = os.scandir(os.path.join(entry.path, "fd"))
-                except (FileNotFoundError, PermissionError):
-                    continue
-                for fd in fds:
-                    try:
-                        real_path = os.path.realpath(fd.path)
-                    except (FileNotFoundError, PermissionError):
-                        continue
-                    if real_path == path:
-                        fds.close()
-                        return True
-
-        return False
 
     def _upload_file(self, path: str) -> None:
         ul_fn = path
