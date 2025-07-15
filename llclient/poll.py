@@ -2,6 +2,7 @@
 
 import argparse
 import glob
+import importlib.metadata
 import os
 import struct
 import subprocess
@@ -182,5 +183,11 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=100,
         help="Sound notification volume.",
+    )
+    parser.add_argument(
+        "--version",
+        "-v",
+        action="version",
+        version=importlib.metadata.version("llclient"),
     )
     return parser.parse_args()
